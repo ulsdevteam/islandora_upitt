@@ -1,0 +1,63 @@
+<?php 
+/**
+	* @file
+	* Adds custom template selection to Pitt's Islandora instance.
+	*/
+	
+/**
+	* Implement hook_help().
+	* $ret_val is assigned the return value.
+	*/
+function islandora_upitt_help($path, $arg) {
+	switch ($path) {
+		case 'admin/help#islandora_upitt': {
+			$ret_val = '<h3>' . t('About') . '</h3>';
+			$ret_val .= '<p>' . t('The islandora_upitt module allows the user to apply a particular template file for use with a particular object type, e.g. an image, book, or newspaper. This way, the proper view will load by default.') . '</p>';
+			return $ret_val;
+			break;
+		}
+	}
+}
+	
+function islandora_upitt_menu() {
+  $items['islandora/object/%islandora_object/viewer'] = array(
+    'title' => 'View',
+    'page callback' => 'islandora_view_object',
+    'page arguments' => array(2),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -1,
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+  );
+
+  return $items;
+}
+
+function islandora_upitt_menu_alter(&$items) {
+  $items['islandora/object/%islandora_object']['page callback'] = 'islanora_upitt_view';
+  $items['islandora/object/%islandora_object/view']['page callback'] = 'islanora_upitt_view';
+  $items['islandora/object/%islandora_object/view']['title'] = 'Metadata';
+}
+
+function islanora_upitt_view($islandora_object) {
+  if (in_array('islandora:collectionCModel', $islandora_object->models) === FALSE) {
+    return theme('islandora_upitt_view', array('islandora_object' => $islandora_object));
+  }
+  else {
+    return islandora_view_object($islandora_object);
+  }
+}
+
+function islandora_upitt_theme() {
+  return array(
+    'islandora_upitt_view' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/islandora-upitt-view',
+      'variables' => array(
+        'islandora_object' => NULL,
+      ),
+    ),
+  );
+}
+
+?>

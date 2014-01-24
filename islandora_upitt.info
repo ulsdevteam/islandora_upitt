@@ -1,0 +1,7 @@
+name						= Islandora Pitt
+description			= Allow a user to apply a specific template based on the type of object e.g. image, book, newspaper.
+core						= 7.x
+version					= 7.x-0.1-dev
+
+; REGIONS
+regions[islandora_object_sidebar] = Islandora Object Sidebar
