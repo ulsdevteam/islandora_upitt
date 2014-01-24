@@ -12,30 +12,16 @@
 	*/
 ?>
 
-<div id="two-col-left-main">
-	<?php
-		print '<p class="subtitle-first">' . $upitt_date . '</p>';
-		print '<p class="subtitle">' . $upitt_creator . '</p>';
-		echo '<br />';
-	?>
-	<div id="content">
-    <div id="object-pg-left-col">
-      <?php
-        print $upitt_lg_thumb;
-      ?>
-      <div class="widget">
-      <?php
-      $block = block_load('user', 'new');
-      $render_array = _block_get_renderable_array(_block_render_blocks(array($block)));
-      $output = render($render_array);
-      print $output;
 
-      ?>
-     	</div><!-- /end widget -->
-    </div><!-- /end ojbect-pg-left-col -->
+		<p class="subtitle-first"> <?php print $upitt_date; ?></p>
+		<p class="subtitle"><?php print $upitt_creator; ?></p>
 
-    <div id="object-pg-right-col">
-      <?php print $metadata; ?>
-    </div><!-- /end ojbect-pg-right-col -->
-  </div><!-- /end content -->
-</div><!-- /end two-col-left-main -->
+    <div style="float: left; width: 40%;">
+    <?php print $upitt_lg_thumb; ?>
+    </div>
+    <div style="float:right; width:60%;">
+    <?php print $metadata; ?>
+    </div>
+
+
+
