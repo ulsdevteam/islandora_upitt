@@ -1,10 +1,10 @@
 <?php
 
 function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
-  dsm($variables, 'var');
-  //dsm($variables, 'variables for theme');
   $islandora_object = $variables['islandora_object'];
-  $variables['upitt_lg_thumb'] = theme('image', array('path' => url("islandora/object/{$islandora_object->id}/datastream/TN_LARGE/view"), 'title' => $islandora_object->label));
+  $url = "islandora/object/{$islandora_object->id}/viewer";
+  $variables['upitt_object_view'] = l('View Object', $url);
+  $variables['upitt_lg_thumb'] = l(theme('image', array('path' => url("islandora/object/{$islandora_object->id}/datastream/TN_LARGE/view"), 'title' => $islandora_object->label)), $url, array('html' => TRUE));
 
   $mods = $islandora_object['MODS']->content;
   if ($mods) {

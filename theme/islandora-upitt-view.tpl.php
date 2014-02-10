@@ -12,22 +12,19 @@
 	*/
 ?>
 
-<div id="two-col-left-main">
-	<?php
-		print '<p class="subtitle-first">' . $upitt_date . '</p>';
-		print '<p class="subtitle">' . $upitt_creator . '</p>';
-		echo '<br />';
-	?>
+<!--<div id="two-col-left-main">-->
+
+		<p class="subtitle-first"><?php print $upitt_date; ?></p>
+		<p class="subtitle"><?php print $upitt_creator; ?></p>
+		<br />
 	<div id="content">
     <div id="object-pg-left-col">
-      <?php
-        print $upitt_lg_thumb;
-      ?>
-
+      <?php print $upitt_object_view; ?>
+      <?php print $upitt_lg_thumb; ?>
     </div><!-- /end ojbect-pg-left-col -->
 
     <div id="object-pg-right-col">
       <?php print $metadata; ?>
     </div><!-- /end ojbect-pg-right-col -->
   </div><!-- /end content -->
-</div><!-- /end two-col-left-main -->
+<!--</div><!-- /end two-col-left-main -->
