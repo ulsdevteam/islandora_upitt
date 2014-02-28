@@ -21,25 +21,30 @@ function islandora_upitt_help($path, $arg) {
 
 function islandora_upitt_menu() {
   $items['islandora/object/%islandora_object/viewer'] = array(
-    'title' => 'View',
+    'title' => 'View Object',
     'page callback' => 'islandora_view_object',
     'page arguments' => array(2),
     'type' => MENU_CALLBACK,
     'weight' => -1,
-    'access callback' => 'islandora_object_access_callback',
+    'access callback' => 'islandora_upitt_viewer_aaccess_callback',
     'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
   );
-  
+
   return $items;
+}
+function islandora_upitt_viewer_aaccess_callback($permission, $islandora_object) {
+  if(islandora_object_access_callback($permission, $islandora_object) && in_array('islandora:collectionCModel', $islandora_object->models) == FALSE) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
 }
 
 function islandora_upitt_menu_alter(&$items) {
   $items['islandora/object/%islandora_object']['page callback'] = 'islanora_upitt_view';
   $items['islandora/object/%islandora_object/view']['page callback'] = 'islanora_upitt_view';
   $items['islandora/object/%islandora_object/view']['title'] = 'Metadata';
-  $items['islandora/object/%islandora_object/view']['type'] = MENU_CALLBACK;
-
-  $items['islandora/object/%islandora_object/manage']['type'] = MENU_LOCAL_ACTION;
 }
 
 function islanora_upitt_view($islandora_object) {

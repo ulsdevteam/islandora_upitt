@@ -19,8 +19,17 @@
 		<br />
 	<div id="content">
     <div id="object-pg-left-col">
-      <?php print $upitt_object_view; ?>
-      <?php print $upitt_lg_thumb; ?>
+      <?php if(isset($upitt_viewer_link)): ?>
+        <div>
+          <?php print $upitt_viewer_link; ?>
+        </div>
+      <?php endif; ?>
+      <?php if(isset($upitt_lg_thumb)): ?>
+        <div>
+          <?php print $upitt_lg_thumb; ?>
+        </div>
+      <?php endif; ?>
+
     </div><!-- /end ojbect-pg-left-col -->
 
     <div id="object-pg-right-col">
