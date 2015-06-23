@@ -33,6 +33,14 @@ function islandora_upitt_menu() {
   return $items;
 }
 function islandora_upitt_viewer_aaccess_callback($permission, $islandora_object) {
+  /*
+  drupal_static_reset('islandora_get_tuque_connection');
+  $connection = islandora_get_tuque_connection();
+  $page = $connection->repository->getObject('pitt:collection.137');
+  $page->relationships->add('info:fedora/fedora-system:def/relations-external#', 'isMemberOfCollection', 'pitt:root');
+  */
+
+
   if(islandora_object_access_callback($permission, $islandora_object) && in_array('islandora:collectionCModel', $islandora_object->models) == FALSE) {
     return TRUE;
   }

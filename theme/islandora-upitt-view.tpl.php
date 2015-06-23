@@ -12,28 +12,13 @@
 	*/
 ?>
 
-<!--<div id="two-col-left-main">-->
-
-		<p class="subtitle-first"><?php print $upitt_date; ?></p>
-		<p class="subtitle"><?php print $upitt_creator; ?></p>
-		<br />
-	<div id="content">
-    <div id="object-pg-left-col">
-      <?php if(isset($upitt_viewer_link)): ?>
-        <div>
-          <?php print $upitt_viewer_link; ?>
-        </div>
-      <?php endif; ?>
-      <?php if(isset($upitt_lg_thumb)): ?>
-        <div>
-          <?php print $upitt_lg_thumb; ?>
-        </div>
-      <?php endif; ?>
-
-    </div><!-- /end ojbect-pg-left-col -->
-
-    <div id="object-pg-right-col">
-      <?php print $metadata; ?>
-    </div><!-- /end ojbect-pg-right-col -->
-  </div><!-- /end content -->
-<!--</div><!-- /end two-col-left-main -->
+<div id="two-col-left-main">
+  <p class="subtitle-first"><?php print $upitt_date; ?></p>
+  <p class="subtitle"><?php print $upitt_creator; ?></p>
+  <p class="subtitle"><?php print $upitt_viewer_link; ?></p>
+  <div id="main-content"> <?php print $upitt_object_view; ?> <?php print $upitt_lg_thumb; ?> </div><!-- /end main-content -->
+  <div id="sidebar">
+    <?php print render($page['sidebar']); ?>
+    <?php print $metadata; ?>
+  </div><!-- /end sidebar -->
+</div><!-- /end two-col-left-main -->
