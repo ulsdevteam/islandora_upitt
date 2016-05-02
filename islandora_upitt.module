@@ -76,4 +76,18 @@ function islandora_upitt_theme() {
   );
 }
 
+/**
+ * This hook allows modules to register XSLT self-transformations.
+ *
+ * @return array
+ *   An associative array mapping a shortened name to the full path of the
+ *   transformation.
+ */
+function islandora_upitt_xml_form_builder_get_self_transforms() {
+  return array(
+    'pitt_cleanup_mods.xslt' => str_replace(DRUPAL_ROOT.'/', '', dirname(__FILE__).'/transforms/pitt_cleanup_mods.xsl'),
+  );
+}
+
+
 ?>
