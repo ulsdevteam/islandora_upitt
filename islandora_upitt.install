@@ -7,4 +7,6 @@
 function islandora_upitt_uninstall() {
   // Add new variables to clean up.
   variable_del('islandora_upitt_show_sitejump');
+  variable_del('islandora_upitt_sitejump_domain');
+  variable_del('islandora_upitt_sitejump_tab_text');
 } 
