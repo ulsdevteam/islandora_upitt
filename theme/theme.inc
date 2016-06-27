@@ -23,12 +23,12 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
     if ($mods) {
       $mods = simplexml_load_string($mods);
       $date = $mods->xpath("/mods:mods/mods:originInfo/mods:dateOther[@type = 'display']/text()");
-      $date = (string) $date[0];
+      $date = isset($date[0]) ? (string) $date[0] : '';
       $variables['upitt_date'] = $date;
 
 
       $name = $mods->xpath("/mods:mods/mods:name[mods:role/mods:roleTerm = 'depositor']/mods:namePart/text()");
-      $name = (string) $name[0];
+      $name = isset($name[0]) ? (string) $name[0] : '';
       $variables['upitt_creator'] = $name;
 
       module_load_include('inc', 'islandora', 'includes/metadata');

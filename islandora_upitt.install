@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ *
+ */
+function islandora_upitt_uninstall() {
+  // Add new variables to clean up.
+  variable_del('islandora_upitt_show_sitejump');
+} 
