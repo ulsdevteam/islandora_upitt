@@ -1,2 +1,2 @@
-# upitt_extras
+# islandora_upitt
 
