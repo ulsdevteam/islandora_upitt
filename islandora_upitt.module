@@ -20,6 +20,14 @@ function islandora_upitt_help($path, $arg) {
 }
 
 function islandora_upitt_menu() {
+  $items['admin/islandora/tools/islandora_upitt/settings'] = array(
+    'title' => 'Islandora Pitt',
+    'description' => 'Settings for various options within the University of Pittsburgh system and workflow.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_upitt_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/admin.form.inc',
+  );
   $items['islandora/object/%islandora_object/viewer'] = array(
     'title' => 'View Object',
     'page callback' => 'islandora_view_object',
@@ -29,6 +37,15 @@ function islandora_upitt_menu() {
     'access callback' => 'islandora_upitt_viewer_aaccess_callback',
     'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
   );
+  if (variable_get('islandora_upitt_show_sitejump') == 1) {
+    $items['islandora/object/%islandora_object/sitejump'] = array(
+      'title' => variable_get('islandora_upitt_sitejump_tab_text', 'Site Jump'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_upitt_sitejump', 2),
+      'type' => MENU_LOCAL_TASK,
+      'access arguments' => array('administer site configuration'),
+    );
+  }
 
   return $items;
 }
@@ -89,5 +106,10 @@ function islandora_upitt_xml_form_builder_get_self_transforms() {
   );
 }
 
+function islandora_upitt_sitejump() {
+  if (variable_get('islandora_upitt_show_sitejump') == 1) {
+    $path = str_replace(":", "%3A", current_path());
+    drupal_goto(variable_get('islandora_upitt_sitejump_domain', 'gamera.library.pitt.edu') . $path);
+  }
+}
 
-?>

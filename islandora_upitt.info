@@ -5,3 +5,4 @@ version					= 7.x-0.1-dev
 
 ; REGIONS
 regions[islandora_object_sidebar] = Islandora Object Sidebar
+configure = admin/islandora/tools/islandora_upitt/settings
