@@ -1,22 +1,22 @@
 <?php
 /**
-	* @file
-	* Adds custom template selection to Pitt's Islandora instance.
-	*/
+        * @file
+        * Adds custom template selection to Pitt's Islandora instance.
+        */
 
 /**
-	* Implement hook_help().
-	* $ret_val is assigned the return value.
-	*/
+        * Implement hook_help().
+        * $ret_val is assigned the return value.
+        */
 function islandora_upitt_help($path, $arg) {
-	switch ($path) {
-		case 'admin/help#islandora_upitt': {
-			$ret_val = '<h3>' . t('About') . '</h3>';
-			$ret_val .= '<p>' . t('The islandora_upitt module allows the user to apply a particular template file for use with a particular object type, e.g. an image, book, or newspaper. This way, the proper view will load by default.') . '</p>';
-			return $ret_val;
-			break;
-		}
-	}
+        switch ($path) {
+                case 'admin/help#islandora_upitt': {
+                        $ret_val = '<h3>' . t('About') . '</h3>';
+                        $ret_val .= '<p>' . t('The islandora_upitt module allows the user to apply a particular template file for use with a particular object type, e.g. an image, book, or newspaper. This way, the proper view will load by default.') . '</p>';
+                        return $ret_val;
+                        break;
+                }
+        }
 }
 
 function islandora_upitt_menu() {
@@ -112,4 +112,5 @@ function islandora_upitt_sitejump() {
     drupal_goto(variable_get('islandora_upitt_sitejump_domain', 'gamera.library.pitt.edu') . $path);
   }
 }
+
 
