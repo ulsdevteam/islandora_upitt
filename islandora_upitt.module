@@ -108,9 +108,12 @@ function islandora_upitt_xml_form_builder_get_self_transforms() {
 
 function islandora_upitt_sitejump() {
   if (variable_get('islandora_upitt_show_sitejump') == 1) {
-    $path = str_replace(":", "%3A", current_path());
-    drupal_goto(variable_get('islandora_upitt_sitejump_domain', 'gamera.library.pitt.edu') . $path);
+    $domain = variable_get('islandora_upitt_sitejump_domain', 'gamera.library.pitt.edu');
+    if(substr($domain, -1) == '/') {
+      $domain = substr($domain, 0, -1);
+    }
+    $path = '/' . str_replace(":", "%3A", current_path());
+    drupal_goto($domain . $path);
   }
 }
-
 
