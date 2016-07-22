@@ -1,22 +1,25 @@
 <?php
-/**
-        * @file
-        * Adds custom template selection to Pitt's Islandora instance.
-        */
+
+define('UPITT_SITEJUMP', 'View sitejump link');
 
 /**
-        * Implement hook_help().
-        * $ret_val is assigned the return value.
-        */
+	* @file
+	* Adds custom template selection to Pitt's Islandora instance.
+	*/
+
+/**
+	* Implement hook_help().
+	* $ret_val is assigned the return value.
+	*/
 function islandora_upitt_help($path, $arg) {
-        switch ($path) {
-                case 'admin/help#islandora_upitt': {
-                        $ret_val = '<h3>' . t('About') . '</h3>';
-                        $ret_val .= '<p>' . t('The islandora_upitt module allows the user to apply a particular template file for use with a particular object type, e.g. an image, book, or newspaper. This way, the proper view will load by default.') . '</p>';
-                        return $ret_val;
-                        break;
-                }
-        }
+	switch ($path) {
+		case 'admin/help#islandora_upitt': {
+			$ret_val = '<h3>' . t('About') . '</h3>';
+			$ret_val .= '<p>' . t('The islandora_upitt module allows the user to apply a particular template file for use with a particular object type, e.g. an image, book, or newspaper. This way, the proper view will load by default.') . '</p>';
+			return $ret_val;
+			break;
+		}
+	}
 }
 
 function islandora_upitt_menu() {
@@ -43,7 +46,7 @@ function islandora_upitt_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('islandora_upitt_sitejump', 2),
       'type' => MENU_LOCAL_TASK,
-      'access arguments' => array('administer site configuration'),
+      'access arguments' => array(UPITT_SITEJUMP),
     );
   }
 
@@ -108,12 +111,96 @@ function islandora_upitt_xml_form_builder_get_self_transforms() {
 
 function islandora_upitt_sitejump() {
   if (variable_get('islandora_upitt_show_sitejump') == 1) {
-    $domain = variable_get('islandora_upitt_sitejump_domain', 'gamera.library.pitt.edu');
-    if(substr($domain, -1) == '/') {
-      $domain = substr($domain, 0, -1);
-    }
-    $path = '/' . str_replace(":", "%3A", current_path());
-    drupal_goto($domain . $path);
+    $path = str_replace(":", "%3A", current_path());
+    drupal_goto(variable_get('islandora_upitt_sitejump_domain', 'http://gamera.library.pitt.edu') . $path);
   }
 }
 
+/**
+ * Implements hook_block_info().
+ */
+function islandora_upitt_block_info() {
+    $block_dsids = variable_get('islandora_datastream_blocks_block_dsids', '');
+    $block_dsids_arr = explode(",", $block_dsids);
+    $b = array();
+    foreach ($block_dsids_arr as $block_dsid) {
+        $bid = trim($block_dsid);
+        $blocks['idb-'.$bid] = array(
+            'info' => t('Islandora Datastream Block {'.$bid.'}'),
+            'cache' => DRUPAL_CACHE_PER_PAGE,
+        );
+        $b[] = $block_dsid;
+    }
+    return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function islandora_upitt_block_view($delta = '') {
+    if ($delta == "*uninitialized*") { exit; }
+    if (strstr($delta, 'idb-') <> '') {
+        $block = array();
+        $dsid = str_replace('idb-', '', $delta);
+        include_once('sites/all/modules/islandora/includes/tuque.inc');
+
+        $item = menu_get_item();
+        if (isset($item['page_arguments'][0]) && is_object($item['page_arguments'][0]) && (get_class($item['page_arguments'][0]) == 'IslandoraFedoraObject')) {
+            $fedora_object = $item['page_arguments'][0];
+            $connection = islandora_get_tuque_connection();
+            if ($connection) {
+                try {
+                    $info = $connection->api->a->describeRepository();
+                    // If we are able to successfully call API-M::getDatastream, assume we are
+                    // an authenticated user, as API-M is usally locked down.
+                    $datastream = $fedora_object[$dsid];
+                    $content = '';
+                    if (($datastream) && (is_object($datastream))) {
+                      // handle the various types of content there, the default will be rendered as straight text
+                      switch ($datastream->mimetype) {
+                        case 'image/jpeg':
+                        case 'image/jpg':
+                        case 'image/gif':
+                        case 'image/png':
+                          if (isset($fedora_object[$dsid])) {
+                            $collection_tn_url = url("islandora/object/{$fedora_object->id}/datastream/{$dsid}/view");
+                            $params = array(
+                              'title' => $fedora_object->label,
+                              'alt' => $fedora_object->label,
+                              'path' => $collection_tn_url);
+                            $content = theme('image', $params);
+                          }
+                          break;
+                        default:
+                          $tempFilename = tempnam("/tmp", "DS_html_");
+                          $datastream->getContent($tempFilename);
+                          $content = implode("", file($tempFilename));
+                          @unlink($tempFilename);
+                          break;
+                      }
+                    }
+
+                    // blank title so that it doesn't cause a big h3
+                    $block['subject'] = '';
+                    $block['content'] =  theme('datastream_block',array('datastream_contents' => $content));
+                    return $block;
+                } catch (Exception $e) {
+                    exit;
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function islandora_upitt_permission() {
+  return array(
+    UPITT_SITEJUMP => array(
+      'title' => t('View Sitejump link'),
+      'description' => t('Sitejump to STAFF website will be available on islandora content pages.'),
+    ),
+  );
+}
