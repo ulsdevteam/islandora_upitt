@@ -196,7 +196,7 @@ function islandora_upitt_block_view($delta = '') {
 /**
  * Implements hook_permission().
  */
-function islandora_datastream_htmleditor_permission() {
+function islandora_upitt_permission() {
   return array(
     UPITT_SITEJUMP => array(
       'title' => t('View Sitejump link'),
