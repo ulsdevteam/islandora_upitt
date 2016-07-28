@@ -13,7 +13,7 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
       }});',
     array('type' => 'inline', 'scope' => 'footer', 'weight' => 5)
   );
-    $variables['upitt_viewer_link'] = l('View content in viewer', $url, array(
+    $variables['upitt_viewer_link'] = l('View this item', $url, array(
       'attributes' => array(
         'class' => array('upitt-viewer-link'))));
     $variables['upitt_lg_thumb'] = isset($islandora_object["TN_LARGE"]) ? l(theme('image', array('path' => url("islandora/object/{$islandora_object->id}/datastream/TN_LARGE/view"), 'title' => $islandora_object->label)), $url, array('html' => TRUE)) : "";
