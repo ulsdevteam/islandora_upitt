@@ -16,9 +16,10 @@
   <p class="subtitle-first"><?php print $upitt_date; ?></p>
   <p class="subtitle"><?php print $upitt_creator; ?></p>
   <p class="subtitle"><?php print $upitt_viewer_link; ?></p>
-  <div id="main-content"> <?php print $upitt_object_view; ?> <?php print $upitt_lg_thumb; ?> </div><!-- /end main-content -->
-  <div id="sidebar">
-    <?php print render($page['sidebar']); ?>
-    <?php print $metadata; ?>
-  </div><!-- /end sidebar -->
+  <div id="main-content"> 
+  <?php if (isset($upitt_object_view)) { 
+    print $upitt_object_view; 
+  } ?> 
+  <?php print $upitt_lg_thumb; ?> 
+  </div><!-- /end main-content -->
 </div><!-- /end two-col-left-main -->
