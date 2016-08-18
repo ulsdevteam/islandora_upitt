@@ -16,7 +16,18 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
     $variables['upitt_viewer_link'] = l('View this item', $url, array(
       'attributes' => array(
         'class' => array('upitt-viewer-link'))));
-    $variables['upitt_lg_thumb'] = isset($islandora_object["TN_LARGE"]) ? l(theme('image', array('path' => url("islandora/object/{$islandora_object->id}/datastream/TN_LARGE/view"), 'title' => $islandora_object->label)), $url, array('html' => TRUE)) : "";
+    
+    $collection_tn_url = '';
+    if (isset($islandora_object['TN_LARGE'])) {
+      $tn_url = url("islandora/object/{$islandora_object->id}/datastream/TN_LARGE/view");
+    } elseif (isset($islandora_object['TN'])) {
+      $tn_url = url("islandora/object/{$islandora_object->id}/datastream/TN/view");
+    }
+    $params = array(
+      'title' => $islandora_object->label,
+      'alt' => $islandora_object->label,
+      'path' => $tn_url);
+    $variables['upitt_lg_thumb'] = ($tn_url) ? l(theme('image', $params), $url, array('html' => TRUE)) : '';
 
     if (isset($islandora_object['MODS'])) {
       $mods = $islandora_object['MODS']->content;
