@@ -36,9 +36,11 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
       $date = isset($date[0]) ? (string) $date[0] : '';
       $variables['upitt_date'] = $date;
 
-      $name = $mods->xpath("/mods:mods/mods:name[mods:role/mods:roleTerm = 'depositor']/mods:namePart/text()");
-      $name = isset($name[0]) ? (string) $name[0] : '';
-      $variables['upitt_creator'] = $name;
+      // As of 8/30/16, we no longer want to display the depositor.  BGG
+      /* $name = $mods->xpath("/mods:mods/mods:name[mods:role/mods:roleTerm = 'depositor']/mods:namePart/text()");
+      $name = isset($name[0]) ? (string) $name[0] : ''; */
+      // As of 8/30/16, we no longer want to display the depositor.  BGG
+      $variables['upitt_creator'] = ''; // $name;
 
       module_load_include('inc', 'islandora', 'includes/metadata');
       $variables['metadata'] = islandora_retrieve_metadata_markup($islandora_object);
