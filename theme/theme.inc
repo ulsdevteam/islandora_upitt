@@ -30,6 +30,8 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
     $variables['upitt_lg_thumb'] = ($tn_url) ? l(theme('image', $params), $url, array('html' => TRUE)) : '';
 
     if (isset($islandora_object['MODS'])) {
+      // WE no longer need to populate a upitt_date or upitt_creator
+      /*
       $mods = $islandora_object['MODS']->content;
       $mods = simplexml_load_string($mods);
       $date = $mods->xpath("/mods:mods/mods:originInfo/mods:dateOther[@type = 'display']/text()");
@@ -37,10 +39,11 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
       $variables['upitt_date'] = $date;
 
       // As of 8/30/16, we no longer want to display the depositor.  BGG
-      /* $name = $mods->xpath("/mods:mods/mods:name[mods:role/mods:roleTerm = 'depositor']/mods:namePart/text()");
-      $name = isset($name[0]) ? (string) $name[0] : ''; */
+      $name = $mods->xpath("/mods:mods/mods:name[mods:role/mods:roleTerm = 'depositor']/mods:namePart/text()");
+      $name = isset($name[0]) ? (string) $name[0] : '';
       // As of 8/30/16, we no longer want to display the depositor.  BGG
       $variables['upitt_creator'] = ''; // $name;
+      */
 
       module_load_include('inc', 'islandora', 'includes/metadata');
       $variables['metadata'] = islandora_retrieve_metadata_markup($islandora_object);
