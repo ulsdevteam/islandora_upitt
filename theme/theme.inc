@@ -45,11 +45,14 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
       $variables['upitt_creator'] = ''; // $name;
       */
 
-      module_load_include('inc', 'islandora', 'includes/metadata');
-      $variables['metadata'] = islandora_retrieve_metadata_markup($islandora_object);
+//      module_load_include('inc', 'islandora', 'includes/metadata');
+//      $variables['metadata'] = islandora_retrieve_metadata_markup($islandora_object);
     } else {
-      $variables['metadata'] = $variables['upitt_creator'] = $variables['upitt_date'] = '';
+//      $variables['metadata'] = 
+      $variables['upitt_creator'] = $variables['upitt_date'] = '';
     }
+    module_load_include('inc', 'islandora', 'includes/metadata');
+    $variables['metadata'] = islandora_retrieve_metadata_markup($islandora_object);
   }
 }
 

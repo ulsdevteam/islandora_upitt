@@ -22,4 +22,8 @@
   } ?> 
   <?php print $upitt_lg_thumb; ?> 
   </div><!-- /end main-content -->
+  <div id="sidebar-right">
+    <?php print render($page['sidebar']); ?>
+    <?php print $metadata; ?>
+  </div><!-- /end sidebar -->
 </div><!-- /end two-col-left-main -->
