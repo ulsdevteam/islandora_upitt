@@ -204,3 +204,221 @@ function islandora_upitt_permission() {
     ),
   );
 }
+
+function islandora_upitt_token_info() {
+  return array(
+    'types' => array(
+      'gaObjTracking' => array(
+        'name' => 'Object Analytics',
+        'description' => t("Tokens for Google Analytics tracking related to islandora objects."),
+      ),
+      'gaSearchTracking' => array(
+        'name' => 'Search Analytics',
+        'description' => t("Tokens for Google Analytics tracking related to islandora searching pages."),
+      ),
+    ),
+    'tokens' => array(
+      'gaObjTracking' => array(
+        'collectionOfObject' => array(
+          'name' => t("Collection of Object"),
+          'description' => t("The Collections that an object belongs to as comma separated list."),),
+        'collectionNamesOfObject' => array(
+          'name' => t("Collection Names of Object"),
+          'description' => t("The Collections that an object belongs to as comma separated list."),),
+        'depositorOfObject' => array(
+          'name' => t("Depositor of Object"),
+          'description' => t("The Depositor for the object."),),
+      ),
+      'gaSearchTracking' => array(
+        'search_all' => array(
+          'name' => t("Anywhere in record"),
+          'description' => t("Search anywhere in record for value."),),
+        'search_title' => array(
+          'name' => t("Search Title"),
+          'description' => t("Search dc.title for value."),),
+        'search_subject' => array(
+          'name' => t("Search Subject"),
+          'description' => t("Search dc.subject	for value."),),
+        'search_description' => array(
+          'name' => t("Search Description"),
+          'description' => t("Search mods_abstract_mt for value."),),
+        'search_date' => array(
+          'name' => t("Search Date"),
+          'description' => t("Search mods_originInfo_dateOther_ms for value."),),
+        'search_creator' => array(
+          'name' => t("Search Creator"),
+          'description' => t("Search dc.creator for value."),),
+        'search_identifier' => array(
+          'name' => t("Search Identifier"),
+          'description' => t("Search dc.identifier for value."),),
+        'facet_creator' => array(
+          'name' => t("Facet Creator"),
+          'description' => t("Search mods_name_creator_namePart_ms for value."),),
+        'facet_type' => array(
+          'name' => t("Facet Type"),
+          'description' => t("Search mods_typeOfResource_ms for value."),),
+        'facet_source' => array(
+          'name' => t("Facet Source"),
+          'description' => t("Search mods_relatedItem_host_titleInfo_title_ms for value."),),
+        'facet_subject' => array(
+          'name' => t("Facet Subject"),
+          'description' => t("Search mods_subject_topic_ms for value."),),
+        'facet_collection' => array(
+          'name' => t("Facet Collection"),
+          'description' => t("Search RELS_EXT_isMemberOfCollection_uri_ms for value."),),
+        'facet_depositor' => array(
+          'name' => t("Facet Depositor"),
+          'description' => t("Search mods_name_depositor_namePart_ms for value."),),
+        'facet_copyrightStatus' => array(
+          'name' => t("Facet Copyright Status"),
+          'description' => t("Search mods_accessCondition_copyright_copyright_status_ms for value."),),
+        'facet_publicationStatus' => array(
+          'name' => t("Facet Publication Status"),
+          'description' => t("Search mods_accessCondition_copyright_publication_status_ms for value."),),
+        'facet_location' => array(
+          'name' => t("Facet Location"),
+          'description' => t("Search mods_subject_geographic_ms for value."),),
+      ),
+    )
+  );
+}
+
+function islandora_upitt_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $sanitize = !empty($options['sanitize']);
+  $replacements = array();
+  if ($type == 'gaSearchTracking') {
+    $token_to_solrfield_mapping = array('search_all' => 'catch_all_fields_mt', 'search_title' => 'dc.title', 'search_subject' => 'dc.subject', 'search_description' => 'mods_abstract_mt', 
+      'search_date' => 'mods_originInfo_dateOther_ms', 'search_creator' => 'dc.creator', 'search_identifier' => 'dc.identifier', 
+      'facet_creator' => 'mods_name_creator_namePart_ms', 'facet_type' => 'mods_typeOfResource_ms', 'facet_source' => 'mods_relatedItem_host_titleInfo_title_ms', 
+      'facet_subject' => 'mods_subject_topic_ms', 'facet_collection' => 'RELS_EXT_isMemberOfCollection_uri_ms', 'facet_depositor' => 'mods_name_depositor_namePart_ms', 
+      'facet_copyrightStatus' => 'mods_accessCondition_copyright_copyright_status_ms', 'facet_publicationStatus' => 'mods_accessCondition_copyright_publication_status_ms', 'facet_location' => 'mods_subject_geographic_ms');
+    $cur_search = _get_current_search();
+    $current_search = array();
+    // make the solr field the key of the elements of this array -- searchNV is the name/value pair with "=" splitting them
+    foreach ($cur_search as $k => $searchNV) {
+      @list($field_name, $value) = explode("=", str_replace(array('"', ')', '('), "", $searchNV), 2);
+      if ($value) {
+        $current_search[$field_name] = $value;
+      }
+      else {
+        @list($field_name, $value) = explode(":", $searchNV, 2);
+        if ($value) {
+          $current_search[$field_name] = $value;
+        }
+      }
+    }
+    foreach ($tokens as $name => $original) {
+      $token_key = array_key_exists($name, $token_to_solrfield_mapping) ? $token_to_solrfield_mapping[$name] : NULL;
+      if ($token_key) {
+        $replacements[$original] = ($sanitize) ? check_plain($current_search[$token_to_solrfield_mapping[$name]]) : $current_search[$token_to_solrfield_mapping[$name]];
+      }
+    }
+    return $replacements;
+  } elseif ($type == 'gaObjTracking') {
+    $islandora_object = menu_get_object('islandora_object', 2);
+    if (!is_object($islandora_object)) {
+      $items = menu_get_item();
+      $islandora_object = is_string($items['page_arguments'][0]) ? NULL : $items['page_arguments'][0];
+    }
+    foreach ($tokens as $name => $original) {
+      if (!is_null($islandora_object) && ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject' || $name == 'depositorOfObject')) {
+        if ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject') {
+          $collections = upitt_get_solr_field_value($islandora_object, 'RELS_EXT_isMemberOfCollection_uri_ms', FALSE);
+          if ($collections) {
+            $replacements[$original] = (($name == 'collectionOfObject') ? $collections : _get_collection_names($collections));
+          }
+        } elseif ($name == 'depositorOfObject') {
+          $depositor = upitt_get_solr_field_value($islandora_object, 'mods_name_depositor_namePart_ms', FALSE);
+          $replacements[$original] = $depositor;
+        }
+        if ($sanitize) {
+          $replacements[$original] = check_plain($replacements[$original]);
+        }
+      }
+    }
+    return $replacements;
+  }
+  return array();
+}
+
+/**
+ * Helper function to get all of the current search terms and their corresponding values.
+ */
+function _get_current_search() {
+  global $_islandora_solr_queryclass;
+
+  $params = $_islandora_solr_queryclass->solrParams['fq'];
+  $keep_params = array();
+  // Since the islandora_search uses POST variables to specify at least some of the search parameters, this method
+  // will allow us to set the page parameter that is sent to Google Analytics
+  // The base Solr filter should not matter for the Google Analytics side of things because all objects per site
+  // are already expected to be limited to PID:(pitt*) AND RELS_EXT_isMemberOfSite_uri_ms:info\\:fedora\\/pitt\\:site.uls-digital-collections, etc.
+  // strip out the fq value that begins with PID:(pitt*)...
+  foreach ($params as $param) {
+    if (strstr($param, 'PID:(pitt') == '') {
+      $keep_params[] = str_replace("\=", "\:", str_replace(":", "=", $param));
+    }
+  }
+
+  // if this is a dismax search, for the purposes of search tracking, simply log the string value as a catch_all_fields_mt
+  if (strstr($_SERVER['REQUEST_URI'], 'type=dismax')) {
+    $keep_params[] = 'catch_all_fields_mt:' . $_islandora_solr_queryclass->solrQuery;
+  } else {
+    $keep_params[] = str_replace("\=", "\:", str_replace(":", "=", $_islandora_solr_queryclass->solrQuery));
+  }
+  return $keep_params;
+}
+
+/**
+ * Helper function for siteSearchTerms to return the search fields and corresponding values.
+ */
+function islandora_upitt_googleanalytics_url_custom_alter(&$url_custom) {
+  $current_search = _get_current_search();
+  $search = implode('&', $current_search);
+  $url_custom = '"/islandora/search/?' . $search . '"';
+}
+
+/** 
+ * Helper function for collectionNamesOfObject call.
+ */ 
+function _get_collection_names($collection_pids) { 
+  if (!is_array($collection_pids)) { $collection_pids = explode(", ", $collection_pids); }
+  foreach ($collection_pids as $k => $pid) {
+    $collection_pids[$k] = str_replace(":", "\:", str_replace("info:fedora/", "", $pid));
+  }
+  $q = '(PID:' . implode(" OR PID:", $collection_pids) . ')';
+  return _get_solr_query_results($q, 'fgs_label_s', FALSE);
+}  
+
+/**
+ * Helper function to lookup any solr field value for an islandora_object.
+ */
+function upitt_get_solr_field_value($islandora_object, $field, $single_result = TRUE, $pid = '') {
+  $q = 'PID:' . str_replace(":", "\:", (is_null($islandora_object) && $pid) ? $pid : $islandora_object->id);
+  return _get_solr_query_results($q, $field, $single_result);
+}
+
+function _get_solr_query_results($query, $field, $single_result = TRUE, $pid = '') {
+  $value = NULL;
+  $query_processor = new IslandoraSolrQueryProcessor();
+  $query_processor->solrQuery = $query;
+  $query_processor->solrStart = 0;
+  $query_processor->solrLimit = 20;
+  $query_processor->solrParams = array(
+    'fl' => $field,
+    'fq' => variable_get('islandora_solr_base_filter', ''),
+  );
+  $query_processor->executeQuery(FALSE);
+  if ($query_processor->islandoraSolrResult['response']['numFound'] > 0) {
+    $solr_result_objects = $query_processor->islandoraSolrResult['response']['objects'];
+    $values = array();
+    $i = 0;
+    foreach ($solr_result_objects as $object) {
+      if (($single_result && $i < 1) || !($single_result)) {
+        $values[] = (is_array($object['solr_doc'][$field])) ? implode(", ", array_unique($object['solr_doc'][$field])) : $object['solr_doc'][$field];
+      }
+    }
+    $value = implode(", ", $values);
+  }
+  return $value;
+}
