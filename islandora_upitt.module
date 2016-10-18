@@ -415,7 +415,11 @@ function _get_solr_query_results($query, $field, $single_result = TRUE, $pid = '
     $i = 0;
     foreach ($solr_result_objects as $object) {
       if (($single_result && $i < 1) || !($single_result)) {
-        $values[] = (is_array($object['solr_doc'][$field])) ? implode(", ", array_unique($object['solr_doc'][$field])) : $object['solr_doc'][$field];
+        $cur_value = is_array($object['solr_doc'][$field]) ? implode(", ", $object['solr_doc'][$field]) : $object['solr_doc'][$field];
+        if (!($field == 'RELS_EXT_isMemberOfCollection_uri_ms' && $cur_value == 'info:fedora/pitt:root')) {
+          $values[] = (is_array($object['solr_doc'][$field])) ? implode(", ", array_unique($object['solr_doc'][$field])) : $object['solr_doc'][$field];
+          $i++;
+        }
       }
     }
     $value = implode(", ", $values);
