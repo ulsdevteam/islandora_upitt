@@ -295,15 +295,17 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
     $cur_search = _get_current_search();
     $current_search = array();
     // make the solr field the key of the elements of this array -- searchNV is the name/value pair with "=" splitting them
-    foreach ($cur_search as $k => $searchNV) {
-      @list($field_name, $value) = explode("=", str_replace(array('"', ')', '('), "", $searchNV), 2);
-      if ($value) {
-        $current_search[$field_name] = $value;
-      }
-      else {
-        @list($field_name, $value) = explode(":", $searchNV, 2);
+    if (is_array($cur_search) && count($cur_search) > 0) {
+      foreach ($cur_search as $k => $searchNV) {
+        @list($field_name, $value) = explode("=", str_replace(array('"', ')', '('), "", $searchNV), 2);
         if ($value) {
           $current_search[$field_name] = $value;
+        }
+        else {
+          @list($field_name, $value) = explode(":", $searchNV, 2);
+          if ($value) {
+            $current_search[$field_name] = $value;
+          }
         }
       }
     }
@@ -344,6 +346,9 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
  */
 function _get_current_search() {
   global $_islandora_solr_queryclass;
+  if (!is_object($_islandora_solr_queryclass)) {
+    return FALSE;
+  }
 
   $params = $_islandora_solr_queryclass->solrParams['fq'];
   $keep_params = array();
@@ -372,8 +377,7 @@ function _get_current_search() {
  */
 function islandora_upitt_googleanalytics_url_custom_alter(&$url_custom) {
   $current_search = _get_current_search();
-  $search = implode('&', $current_search);
-  $url_custom = '"/islandora/search/?' . $search . '"';
+  $url_custom = ($current_search) ? '"/islandora/search/?' . implode('&', $current_search) . '"' : $url_custom;
 }
 
 /** 
