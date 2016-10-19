@@ -309,7 +309,7 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
     }
     foreach ($tokens as $name => $original) {
       $token_key = array_key_exists($name, $token_to_solrfield_mapping) ? $token_to_solrfield_mapping[$name] : NULL;
-      if ($token_key) {
+      if ($token_key && array_key_exists($token_key, $current_search)) {
         $replacements[$original] = ($sanitize) ? check_plain($current_search[$token_to_solrfield_mapping[$name]]) : $current_search[$token_to_solrfield_mapping[$name]];
       }
     }
@@ -318,21 +318,19 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
     $islandora_object = menu_get_object('islandora_object', 2);
     if (!is_object($islandora_object)) {
       $items = menu_get_item();
-      $islandora_object = is_string($items['page_arguments'][0]) ? NULL : $items['page_arguments'][0];
+      $islandora_object = (is_array($items['page_arguments']) && is_string($items['page_arguments'][0])) ? NULL : $items['page_arguments'][0];
     }
     foreach ($tokens as $name => $original) {
       if (!is_null($islandora_object) && ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject' || $name == 'depositorOfObject')) {
         if ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject') {
           $collections = upitt_get_solr_field_value($islandora_object, 'RELS_EXT_isMemberOfCollection_uri_ms', FALSE);
           if ($collections) {
-            $replacements[$original] = (($name == 'collectionOfObject') ? $collections : _get_collection_names($collections));
+            $replacements[$original] = (($name == 'collectionOfObject') ? (($sanitize) ? check_plain($collections) : $collections) : 
+              (($sanitize) ? check_plain(_get_collection_names($collections)) : _get_collection_names($collections)));
           }
         } elseif ($name == 'depositorOfObject') {
           $depositor = upitt_get_solr_field_value($islandora_object, 'mods_name_depositor_namePart_ms', FALSE);
-          $replacements[$original] = $depositor;
-        }
-        if ($sanitize) {
-          $replacements[$original] = check_plain($replacements[$original]);
+          $replacements[$original] = ($sanitize) ? check_plain($depositor) : $depositor;
         }
       }
     }
