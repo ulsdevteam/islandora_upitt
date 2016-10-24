@@ -324,7 +324,7 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
       $items = menu_get_item();
       $islandora_object = (is_array($items['page_arguments']) && is_string($items['page_arguments'][0])) ? NULL : $items['page_arguments'][0];
     }
-    $islandora_object = (get_class($islandora_object) == 'IslandoraFedoraObject') ? $islandora_object : NULL;
+    $islandora_object = (is_object($islandora_object) && get_class($islandora_object) == 'IslandoraFedoraObject') ? $islandora_object : NULL;
     foreach ($tokens as $name => $original) {
       if (!is_null($islandora_object) && ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject' || $name == 'depositorOfObject')) {
         if ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject') {
