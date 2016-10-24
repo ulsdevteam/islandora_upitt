@@ -312,7 +312,9 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
     foreach ($tokens as $name => $original) {
       $token_key = array_key_exists($name, $token_to_solrfield_mapping) ? $token_to_solrfield_mapping[$name] : NULL;
       if ($token_key && array_key_exists($token_key, $current_search)) {
-        $replacements[$original] = ($sanitize) ? check_plain($current_search[$token_to_solrfield_mapping[$name]]) : $current_search[$token_to_solrfield_mapping[$name]];
+        // Since $sanitize will default to TRUE, this is never for display to browser -- let GA worry about encoding the values .. we just need to 
+        // filter_xss to prevent any cross-site script attack.
+        $replacements[$original] = ($sanitize) ? filter_xss($current_search[$token_to_solrfield_mapping[$name]]) : $current_search[$token_to_solrfield_mapping[$name]];
       }
     }
     return $replacements;
@@ -327,12 +329,12 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
         if ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject') {
           $collections = upitt_get_solr_field_value($islandora_object, 'RELS_EXT_isMemberOfCollection_uri_ms', FALSE);
           if ($collections) {
-            $replacements[$original] = (($name == 'collectionOfObject') ? (($sanitize) ? check_plain($collections) : $collections) : 
-              (($sanitize) ? check_plain(_get_collection_names($collections)) : _get_collection_names($collections)));
+            $replacements[$original] = (($name == 'collectionOfObject') ? (($sanitize) ? filter_xss($collections) : $collections) : 
+              (($sanitize) ? filter_xss(_get_collection_names($collections)) : _get_collection_names($collections)));
           }
         } elseif ($name == 'depositorOfObject') {
           $depositor = upitt_get_solr_field_value($islandora_object, 'mods_name_depositor_namePart_ms', FALSE);
-          $replacements[$original] = ($sanitize) ? check_plain($depositor) : $depositor;
+          $replacements[$original] = ($sanitize) ? filter_xss($depositor) : $depositor;
         }
       }
     }
@@ -373,7 +375,7 @@ function _get_current_search() {
 }
 
 /**
- * Helper function for siteSearchTerms to return the search fields and corresponding values.
+ * Hook to modify the url_custom value on search pages - this will become the "Page" value within Google Analytics.
  */
 function islandora_upitt_googleanalytics_url_custom_alter(&$url_custom) {
   $current_search = _get_current_search();
