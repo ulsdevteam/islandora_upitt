@@ -329,7 +329,7 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
       if (!is_null($islandora_object) && ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject' || $name == 'depositorOfObject')) {
         if ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject') {
           $collections = upitt_get_solr_field_value($islandora_object, 'RELS_EXT_isMemberOfCollection_uri_ms', FALSE);
-          if ($collections) {
+          if ($collections) { 
             $replacements[$original] = (($name == 'collectionOfObject') ? (($sanitize) ? filter_xss($collections) : $collections) : 
               (($sanitize) ? filter_xss(_get_collection_names($collections)) : _get_collection_names($collections)));
           }
@@ -392,7 +392,13 @@ function _get_collection_names($collection_pids) {
     $collection_pids[$k] = str_replace(":", "\:", str_replace("info:fedora/", "", $pid));
   }
   $q = '(PID:' . implode(" OR PID:", $collection_pids) . ')';
-  return _get_solr_query_results($q, 'fgs_label_s', FALSE);
+  $str_results = _get_solr_query_results($q, 'fgs_label_s', FALSE);
+  $arr = explode(", ", $str_results);
+  foreach ($arr as $k=>$v) {
+    $arr[$k] = '(' . $v . ')';
+  }
+  sort($arr);
+  return implode(", ", $arr);
 }  
 
 /**
@@ -400,7 +406,13 @@ function _get_collection_names($collection_pids) {
  */
 function upitt_get_solr_field_value($islandora_object, $field, $single_result = TRUE, $pid = '') {
   $q = 'PID:' . str_replace(":", "\:", (is_null($islandora_object) && $pid) ? $pid : $islandora_object->id);
-  return _get_solr_query_results($q, $field, $single_result);
+  $str_results = _get_solr_query_results($q, $field, $single_result);
+  $arr = explode(", ", $str_results);
+  foreach ($arr as $k=>$v) {
+    $arr[$k] = '(' . $v . ')';
+  }
+  sort($arr);
+  return implode(", ", $arr);
 }
 
 function _get_solr_query_results($query, $field, $single_result = TRUE, $pid = '') {
