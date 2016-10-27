@@ -325,11 +325,12 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
       $islandora_object = (is_array($items['page_arguments']) && is_string($items['page_arguments'][0])) ? NULL : $items['page_arguments'][0];
     }
     $islandora_object = (is_object($islandora_object) && get_class($islandora_object) == 'IslandoraFedoraObject') ? $islandora_object : NULL;
+    if ($islandora_object) {
     foreach ($tokens as $name => $original) {
       if (!is_null($islandora_object) && ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject' || $name == 'depositorOfObject')) {
         if ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject') {
           $collections = upitt_get_solr_field_value($islandora_object, 'RELS_EXT_isMemberOfCollection_uri_ms', FALSE);
-          if ($collections) { 
+          if ($collections <> '()') { 
             $replacements[$original] = (($name == 'collectionOfObject') ? (($sanitize) ? filter_xss($collections) : $collections) : 
               (($sanitize) ? filter_xss(_get_collection_names($collections)) : _get_collection_names($collections)));
           }
@@ -338,6 +339,7 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
           $replacements[$original] = ($sanitize) ? filter_xss($depositor) : $depositor;
         }
       }
+    }
     }
     return $replacements;
   }
@@ -395,7 +397,7 @@ function _get_collection_names($collection_pids) {
   $str_results = _get_solr_query_results($q, 'fgs_label_s', FALSE);
   $arr = explode(", ", $str_results);
   foreach ($arr as $k=>$v) {
-    $arr[$k] = '(' . $v . ')';
+     $arr[$k] = '(' . $v . ')';
   }
   sort($arr);
   return implode(", ", $arr);
@@ -425,6 +427,13 @@ function _get_solr_query_results($query, $field, $single_result = TRUE, $pid = '
     'fl' => $field,
     'fq' => variable_get('islandora_solr_base_filter', ''),
   );
+error_log('q = ' . $query_processor->solrQuery);
+$bt = debug_backtrace();
+foreach ($bt as $step) {
+  $tr[] = $step['function'] . ' line ' . $step['line'];
+}
+error_log(print_r($tr, true));
+
   $query_processor->executeQuery(FALSE);
   if ($query_processor->islandoraSolrResult['response']['numFound'] > 0) {
     $solr_result_objects = $query_processor->islandoraSolrResult['response']['objects'];
