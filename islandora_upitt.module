@@ -322,7 +322,7 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
     $islandora_object = menu_get_object('islandora_object', 2);
     if (!is_object($islandora_object)) {
       $items = menu_get_item();
-      $islandora_object = (is_array($items['page_arguments']) && is_string($items['page_arguments'][0])) ? NULL : $items['page_arguments'][0];
+      $islandora_object = (is_array($items['page_arguments']) && is_array($items['page_arguments']) && is_string($items['page_arguments'][0])) ? NULL : (is_array($items['page_arguments']) ? $items['page_arguments'][0] : NULL);
     }
     $islandora_object = (is_object($islandora_object) && get_class($islandora_object) == 'IslandoraFedoraObject') ? $islandora_object : NULL;
     if ($islandora_object) {
@@ -427,12 +427,6 @@ function _get_solr_query_results($query, $field, $single_result = TRUE, $pid = '
     'fl' => $field,
     'fq' => variable_get('islandora_solr_base_filter', ''),
   );
-error_log('q = ' . $query_processor->solrQuery);
-$bt = debug_backtrace();
-foreach ($bt as $step) {
-  $tr[] = $step['function'] . ' line ' . $step['line'];
-}
-error_log(print_r($tr, true));
 
   $query_processor->executeQuery(FALSE);
   if ($query_processor->islandoraSolrResult['response']['numFound'] > 0) {
