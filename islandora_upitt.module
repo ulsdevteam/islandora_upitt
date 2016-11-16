@@ -299,12 +299,12 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
       foreach ($cur_search as $k => $searchNV) {
         @list($field_name, $value) = explode("=", str_replace(array('"', ')', '('), "", $searchNV), 2);
         if ($value) {
-          $current_search[$field_name] = $value;
+          $current_search[$field_name] = _simplifySearchString($value);
         }
         else {
           @list($field_name, $value) = explode(":", $searchNV, 2);
           if ($value) {
-            $current_search[$field_name] = $value;
+            $current_search[$field_name] = _simplifySearchString($value);
           }
         }
       }
@@ -314,7 +314,7 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
       if ($token_key && array_key_exists($token_key, $current_search)) {
         // Since $sanitize will default to TRUE, this is never for display to browser -- let GA worry about encoding the values .. we just need to 
         // filter_xss to prevent any cross-site script attack.
-        $replacements[$original] = ($sanitize) ? filter_xss($current_search[$token_to_solrfield_mapping[$name]]) : $current_search[$token_to_solrfield_mapping[$name]];
+        $replacements[$original] = ($sanitize) ? htmlspecialchars_decode(filter_xss($current_search[$token_to_solrfield_mapping[$name]])) : $current_search[$token_to_solrfield_mapping[$name]];
       }
     }
     return $replacements;
@@ -331,12 +331,14 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
         if ($name == 'collectionOfObject' || $name == 'collectionNamesOfObject') {
           $collections = upitt_get_solr_field_value($islandora_object, 'RELS_EXT_isMemberOfCollection_uri_ms', FALSE);
           if ($collections <> '()') { 
-            $replacements[$original] = (($name == 'collectionOfObject') ? (($sanitize) ? filter_xss($collections) : $collections) : 
-              (($sanitize) ? filter_xss(_get_collection_names($collections)) : _get_collection_names($collections)));
+            $replacements[$original] = (($name == 'collectionOfObject') ? (($sanitize) ? htmlspecialchars_decode(filter_xss($collections)) : $collections) : 
+              (($sanitize) ? htmlspecialchars_decode(filter_xss(_get_collection_names($collections))) : _get_collection_names($collections)));
           }
         } elseif ($name == 'depositorOfObject') {
           $depositor = upitt_get_solr_field_value($islandora_object, 'mods_name_depositor_namePart_ms', FALSE);
-          $replacements[$original] = ($sanitize) ? filter_xss($depositor) : $depositor;
+          if ($depositor <> '()') {
+            $replacements[$original] = ($sanitize) ? htmlspecialchars_decode(filter_xss($depositor)) : $depositor;
+          }
         }
       }
     }
@@ -344,6 +346,14 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
     return $replacements;
   }
   return array();
+}
+
+/**
+ * Helper function to make the search text values all lower-case so that there are not multiple entries for the same text,
+ * eg: "East Liberty" is the same as "east liberty", but without this they would be tracked as two different search term hits.
+ */
+function _simplifySearchString($in) {
+  return str_replace(array('"',')', '(', "'"), "", strtolower($in));
 }
 
 /**
