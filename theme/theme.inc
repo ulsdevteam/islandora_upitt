@@ -51,6 +51,9 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
 //      $variables['metadata'] = 
       $variables['upitt_creator'] = $variables['upitt_date'] = '';
     }
+    // Need this javascript to be able to expand / collapse the "Details" fieldset at the bottom
+    drupal_add_js('misc/collapse.js');
+    drupal_add_js('misc/form.js');
     module_load_include('inc', 'islandora', 'includes/metadata');
     $variables['metadata'] = islandora_retrieve_metadata_markup($islandora_object);
   }
