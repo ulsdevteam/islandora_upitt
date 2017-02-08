@@ -456,3 +456,22 @@ function _get_solr_query_results($query, $field, $single_result = TRUE, $pid = '
   }
   return $value;
 }
+
+/**
+ * This can adjust the page contents for any page within the Drupal site.
+ *
+ * For this site, we need to suppress the service links for the access_denied page as well as hide the sidebar
+ */
+function islandora_upitt_preprocess_page(&$variables) {
+  $item = menu_get_item();
+  if (is_array($item)) {
+    $access_denied_vid = str_replace("node/", "", variable_get('site_403'));
+    if (count($item['map']) > 1) {
+      if ($item['map'][0] == 'node' && is_object($item['map'][1]) && $item['map'][1]->vid == $access_denied_vid &&
+        (isset($variables['page']['content']['system_main']['nodes'][$access_denied_vid]['service_links']['#markup']))) {
+        $variables['page']['content']['system_main']['nodes'][$access_denied_vid]['service_links']['#markup'] = '';
+        $variables['page']['sidebar'] = array();
+      }
+    }
+  }
+}
