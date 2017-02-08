@@ -11,8 +11,8 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
     drupal_add_js('jQuery(document).ready(function($) {if(window.location.hash) {
       $(".upitt-viewer-link").attr("href", $(".upitt-viewer-link").attr("href") + window.location.hash);
       }});',
-    array('type' => 'inline', 'scope' => 'footer', 'weight' => 5)
-  );
+      array('type' => 'inline', 'scope' => 'footer', 'weight' => 5)
+    );
     $variables['upitt_viewer_link'] = l('View this item', $url, array(
       'attributes' => array(
         'class' => array('upitt-viewer-link'))));
@@ -30,6 +30,9 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
     $variables['upitt_lg_thumb'] = ($tn_url) ? l(theme('image', $params), $url, array('html' => TRUE)) : '';
 
     if (isset($islandora_object['MODS'])) {
+      $block = module_invoke('upitt_discovery_system_links_block', 'block_view', 'discovery_system_links_block');
+      $variables['discovery_links_block'] = render($block['content']);
+
       // WE no longer need to populate a upitt_date or upitt_creator
       /*
       $mods = $islandora_object['MODS']->content;
@@ -50,7 +53,11 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
     } else {
 //      $variables['metadata'] = 
       $variables['upitt_creator'] = $variables['upitt_date'] = '';
+      $variables['discovery_links_block'] = '';
     }
+    // Need this javascript to be able to expand / collapse the "Details" fieldset at the bottom
+    drupal_add_js('misc/collapse.js');
+    drupal_add_js('misc/form.js');
     module_load_include('inc', 'islandora', 'includes/metadata');
     $variables['metadata'] = islandora_retrieve_metadata_markup($islandora_object);
   }

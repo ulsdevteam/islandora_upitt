@@ -23,5 +23,6 @@
   <div id="sidebar"> 
     <?php print render($page['sidebar']); ?>
     <?php print $metadata; ?>
+    <?php print $discovery_links_block; ?>
   </div><!-- /end sidebar -->
 </div><!-- /end two-col-left-main -->
