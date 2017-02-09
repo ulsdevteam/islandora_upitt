@@ -12,12 +12,19 @@ function _get_pids($howmany = 1000, $dsids = array(), $set_value = TRUE) {
   $filter_suffix = ':' . (!$set_value ? 'true' : 'false');
 
   foreach ($dsids as $dsid) {
-    $versionableFilterForDSIDs[] = 'fedora_datastream_info_' . $dsid . '_VERSIONABLE_ms' . $filter_suffix ;
+    $versionableFilterForDSIDs[] = '(fedora_datastreams_ms: ' . $dsid . ' AND fedora_datastream_info_' . $dsid . '_VERSIONABLE_ms' . $filter_suffix . ')';
   }
 
   $query_processor = new IslandoraSolrQueryProcessor();
 
-  $query_processor->solrQuery = '(' . implode(' OR ', $versionableFilterForDSIDs) . ')'; 
+  // THERE ARE SOME PIDS THAT HAVE NO FEDORA OBJECTS, SO SKIP THESE
+  $skip_pids = array('pitt\:31735038311456-0193', 'pitt\:31735051652349-0006', 'pitt\:31735066205257-0145', 'pitt\:00aa57263m-0075', 'pitt\:00acb4439m-0114', 'pitt\:31735066224407-0001', 
+                     'pitt\:31735056290988-0013', 'pitt\:31735051653461-0104', 'pitt\:31735051652364-0058', 'pitt\:31735038311563-0207', 'pitt\:00aah1813m-0250');
+
+  $skip_no_object_pids = ' AND -(PID:' . implode(' OR PID:', $skip_pids) . ')';
+
+  $query_processor->solrQuery = '(' . implode(' OR ', $versionableFilterForDSIDs) . ')' . $skip_no_object_pids;
+
   $query_processor->solrStart = 0;
   $query_processor->solrLimit = $howmany;
   $query_processor->solrParams = array(
@@ -62,20 +69,37 @@ function update_datastreams_versionable($objects, $dsids = array(), $set_value =
  */
 function update_datastream_versionable($pid, $dsids = array(), $set_value = TRUE) {
   $updates = 0;
-  $object = islandora_object_load($pid);
-
-  if (!$set_value) { $set_value = FALSE; }
-  $dss = array();
-  foreach ($dsids as $dsid) {
-    $datastream = $object[$dsid];
-    if ($datastream->versionable != $set_value) {
-      $datastream->versionable = $set_value;
-      $dss[] = $dsid;
-      $updates++;
+  try {
+    $object = islandora_object_load($pid);
+    if ($object->id) {
+      if (!$set_value) { $set_value = FALSE; }
+      $dss = array();
+      foreach ($dsids as $dsid) {
+        if (isset($object[$dsid])) {
+          $datastream = $object[$dsid];
+          if ($datastream->versionable != $set_value) {
+            $datastream->versionable = $set_value;
+            $object->ingestDatastream($datastream);
+//            $dss[] = $dsid;
+            $updates++;
+          }
+          else {
+//            $dss[] = 'for ' . $pid . '["' . $dsid . '"] already ' . ($set_value ? 'TRUE' : 'FALSE'). ')';
+          }
+        }
+        else {
+          $dss[] = 'No object["' . $dsid . '"] for PID ' . $pid;
+        }
+      }
+    } else {
+      $dss[] = 'NO object for pid ' . $pid;
     }
-    else {
-      $dss[] = '(' . $dsid . ' already ' . ($set_value ? 'TRUE' : 'FALSE'). ')';
-    }
+  }
+  catch (Exception $e) {
+    error_log('pid not found in fedora : pid = ' . $pid);
+  }
+  if (count($dss) > 0) {
+    error_log(implode("\n", $dss));
   }
   return $updates;
 }

@@ -286,7 +286,7 @@ function drush_islandora_upitt_paged_content_update_pagesize_and_gen_ocr() {
   foreach ($pids as $pid) {
     $pid = trim($pid);
     if ($pid) {
-      error_log('update_pagesize_and_gen_ocr for ' . $pid . "\n---------------------------------------------------");
+      error_log('update_pagesize_and_gen_ocr for ' . $pid . "\n---------------------------------------------------" . date('H:i:s'));
       $recalc_pagesizes = drush_islandora_upitt_paged_content_update_page_image_sizes($pid);
       $gen_ocrs = drush_islandora_upitt_paged_content_generate_ocr_datastreams($pid);
       // In a perfect world, this file would only be updated during the batch_finished callback for the "generate_ocr" function call, but
