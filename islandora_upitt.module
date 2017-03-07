@@ -475,3 +475,4 @@ function islandora_upitt_preprocess_page(&$variables) {
     }
   }
 }
+

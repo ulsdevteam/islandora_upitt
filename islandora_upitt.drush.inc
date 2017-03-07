@@ -269,6 +269,9 @@ function drush_islandora_upitt_paged_content_update_page_image_sizes($pid) {
  *   The PID for the book or page object that will be processed.
  */
 function drush_islandora_upitt_paged_content_update_pagesize_and_gen_ocr() {
+  module_load_include('inc', 'islandora_upitt', 'includes/drush_helpers');
+  islandora_upitt_exit_if_running('drush_pcupago');
+
   $process_book_pids_file = drush_get_option('process_book_pids_file', '');
   $processed_book_pids_file = drush_get_option('processed_book_pids_file', '');
   $pid = drush_get_option('pid', '');
@@ -304,5 +307,8 @@ function drush_islandora_upitt_paged_content_update_pagesize_and_gen_ocr() {
       }
     }
   }
+
+  $clear_tmp_command = 'rm -rf /ingest/tmp/pitt*';
+  exec($clear_tmp_command);
 }
 
