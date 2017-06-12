@@ -292,11 +292,13 @@ function drush_islandora_upitt_paged_content_update_pagesize_and_gen_ocr() {
       error_log('update_pagesize_and_gen_ocr for ' . $pid . "\n---------------------------------------------------" . date('H:i:s'));
       $recalc_pagesizes = drush_islandora_upitt_paged_content_update_page_image_sizes($pid);
       $gen_ocrs = drush_islandora_upitt_paged_content_generate_ocr_datastreams($pid);
-      // In a perfect world, this file would only be updated during the batch_finished callback for the "generate_ocr" function call, but
+      // In a perfect world, this file would only be updated during the batch_finished callback for the "generate_ocr" function call,
       // but that function call is not provided with the drush parameters that were passed into this call.
 
       if ($processed_book_pids_file && $recalc_pagesizes && $gen_ocrs) {
-        file_put_contents($processed_book_pids_file, $pid . "\n", FILE_APPEND);
+        error_log('processed_book_pids_file = ' . $processed_book_pids_file . ', add PID = ' . $pid);
+        $bytes_written = file_put_contents($processed_book_pids_file, $pid . "\n", FILE_APPEND);
+        error_log('bytes written = ' . number_format($bytes_written));
       } elseif (!$recalc_pagesizes || !$gen_ocrs) {
         $errors_file = str_replace('.', '_errors.', $processed_book_pids_file);
         $errors_file = (strstr($errors_file, "_errors.")) ? $errors_file : $errors_file . '_errors';

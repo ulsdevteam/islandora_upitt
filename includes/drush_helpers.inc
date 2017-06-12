@@ -191,6 +191,10 @@ function islandora_upitt_exit_if_running($processID_filename) {
   // Now, check for this pid value in the running processes:
   $exists = file_exists('/proc/' . $processID);
   if (!$exists) {
+    // If previous execution crashed, this will clear up any remaining temp files.
+    $clear_tmp_command = 'rm -rf /ingest/tmp/pitt*';
+    exec($clear_tmp_command);
+
     islandora_upitt_write_pid_to_tmp($processID_filename);
   }
   else {
