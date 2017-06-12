@@ -72,6 +72,23 @@ function islandora_upitt_drush_command() {
         'Recalc page sizes and trigger OCR/HOCR derivatives on islandora:372' => 'drush -u 1 pcupago --pid=islandora:372',
         'Recalc page sizes and trigger OCR/HOCR derivatives processing by file of pid values' => 'drush -u 1 pcupago --process_book_pids_file=/home/bgilling/book_pids.txt --processed_book_pids_file=/home/bgilling/processed_book_pids.txt',
       ),
+    ),
+    'islandora_upitt_aggregate_ocr' => array(
+      'aliases' => array('iuao'),
+      'description' => dt('Aggregate the OCR of the pages that belong to a given paged-content object'),
+      'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
+      'drupal dependencies' => array(
+        'islandora_ocr', 'islandora_paged_content'
+      ),
+      'options' => array(
+        'pid' => 'The PID value for the book.',
+        'process_book_pids_file' => 'Optional file containing PID values on each line to process.',
+        'processed_book_pids_file' => 'File to save PID values as they are processed.',
+      ),
+      'examples' => array(
+        'Aggregate the OCR on islandora:372' => 'drush -u 1 iuao islandora:372 --uri=http://site.library.pitt.edu/',
+        'Aggregate the OCR for all objects referenced in a file of pid values' => 'drush -u 1 iuao --process_book_pids_file=/home/bgilling/book_pids.txt --processed_book_pids_file=/home/bgilling/processed_book_pids.txt',
+      ),
     )
   );
 }
@@ -314,3 +331,35 @@ function drush_islandora_upitt_paged_content_update_pagesize_and_gen_ocr() {
   exec($clear_tmp_command);
 }
 
+function drush_islandora_upitt_aggregate_ocr() {
+  module_load_include('inc', 'islandora_upitt', 'includes/drush_helpers');
+  islandora_upitt_exit_if_running('drush_iuao');
+
+  $process_book_pids_file = drush_get_option('process_book_pids_file', '');
+  $processed_book_pids_file = drush_get_option('processed_book_pids_file', '');
+  $pid = drush_get_option('pid', '');
+
+  if ($process_book_pids_file && $processed_book_pids_file && file_exists($process_book_pids_file)) {
+    $file = file($process_book_pids_file);
+    $done_file = (file_exists($processed_book_pids_file) ? file($processed_book_pids_file) : array());
+
+    // Get only the PID values that have not been done yet.
+    $pids = array_diff($file, $done_file);
+  }
+  elseif ($pid) {
+    $pids[] = $pid;
+  }
+  foreach ($pids as $pid) {
+    $pid = trim($pid);
+    if ($pid) {
+      error_log('aggregate_ocr for ' . $pid . "\n---------------------------------------------------" . date('H:i:s'));
+      $islandora_object = islandora_object_load($pid);
+      if (is_object($islandora_object)) {
+        upitt_workflow_aggregate_ocr_derivative($islandora_object);
+      }
+      else {
+        error_log('object could not be loaded for ' . $pid . ' during aggregate_ocr process ' . "\n---------------------------------------------------" . date('H:i:s'));
+      }
+    }
+  }
+}
