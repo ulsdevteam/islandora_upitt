@@ -73,6 +73,12 @@ function islandora_upitt_menu_alter(&$items) {
   $items['islandora/object/%islandora_object']['page callback'] = 'islanora_upitt_view';
   $items['islandora/object/%islandora_object/view']['page callback'] = 'islanora_upitt_view';
   $items['islandora/object/%islandora_object/view']['title'] = 'Metadata';
+
+  // TODO - FIXME... the "page argument" menu route parameter values need to be provided for each callback,
+  // but since this was never working before it will need to be tested.  The following two lines should be
+  // uncommented -- and then test all relevant pages.
+  //  $items['islandora/object/%islandora_object']['page arguments'] = array(2);
+  //  $items['islandora/object/%islandora_object/view']['page arguments'] = array(2);
 }
 
 function islanora_upitt_view($islandora_object) {
@@ -80,7 +86,13 @@ function islanora_upitt_view($islandora_object) {
     return theme('islandora_upitt_view', array('islandora_object' => $islandora_object));
   }
   else {
-    return islandora_view_object($islandora_object);
+    // Object is a collection
+    if (module_exists('upitt_islandora_solr_search_extras')) {
+      return upitt_islandora_solr_search_extras_search_specific($islandora_object);
+    }
+    else {
+      return islandora_view_object($islandora_object);
+    }
   }
 }
 
