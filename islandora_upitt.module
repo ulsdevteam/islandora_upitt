@@ -485,5 +485,11 @@ function islandora_upitt_preprocess_page(&$variables) {
         $variables['page']['sidebar'] = array();
       }
     }
+    // Hide the sidebar on these pages:
+    if ($item['path'] == 'islandora/datastreams_io/export' || $item['path'] == 'islandora/datastreams_io/import' ||
+      $item['path'] == 'islandora/datastreams_io/download_export/%') {
+      $variables['page']['sidebar'] = array();
+    }
   }
 }
+

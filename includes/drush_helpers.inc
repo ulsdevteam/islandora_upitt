@@ -159,4 +159,46 @@ function microtime_float()
     return ((float)$usec + (float)$sec);
 }
 
+/**
+ * Helper function to save the current process identifier (pid) to the $processID_filename (the specific drush process pid file).
+ *
+ * NOTE: The /tmp/{drush_PROCESS} files must be writeable on the server.
+ */
+function islandora_upitt_write_pid_to_tmp($processID_filename) {
+  $processID = getmypid();
+  $file = fopen($processID_filename,"w+");
+  fwrite($file,$processID);
+  fclose($file);
+
+  return $processID;
+}
+
+/**
+ * This code will check for the existence of a pid file for this specific drush process.
+ * If that pid file exists, and if there is a process running (from /proc), then this code
+ * can exit without further processing.
+ */
+function islandora_upitt_exit_if_running($processID_filename) {
+  $processID_filename = '/tmp/' . str_replace('/tmp/', "", $processID_filename);
+
+  if (file_exists($processID_filename)) {
+    $processID_file = file($processID_filename);
+    $processID = trim(@$processID_file[0]);
+  } else {
+    $processID = islandora_upitt_write_pid_to_tmp($processID_filename);
+    return;
+  }
+  // Now, check for this pid value in the running processes:
+  $exists = file_exists('/proc/' . $processID);
+  if (!$exists) {
+    // If previous execution crashed, this will clear up any remaining temp files.
+    $clear_tmp_command = 'rm -rf /ingest/tmp/pitt*';
+    exec($clear_tmp_command);
+
+    islandora_upitt_write_pid_to_tmp($processID_filename);
+  }
+  else {
+    die("The process is already running - /proc/" . $processID . "\n");
+  }
+}
 
