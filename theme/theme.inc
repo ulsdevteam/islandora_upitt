@@ -4,7 +4,7 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
   $islandora_object = (isset($variables['islandora_object']) ? $variables['islandora_object'] : NULL);
   if ($islandora_object && isset($islandora_object->id)) {
     if (isset($islandora_object['PDF'])) {
-      $variables['islandora_content'] = l($variables['islandora_preview_img'], url("islandora/object/{$islandora_object->id}/datastream/PDF/view", array('absolute' => TRUE)), array('html' => TRUE));
+      $variables['islandora_content'] = l( (isset($variables['islandora_preview_img']) ? $variables['islandora_preview_img'] : 'preview missing'), url("islandora/object/{$islandora_object->id}/datastream/PDF/view", array('absolute' => TRUE)), array('html' => TRUE));
     }
 
     $url = url("islandora/object/{$islandora_object->id}/viewer", array(
