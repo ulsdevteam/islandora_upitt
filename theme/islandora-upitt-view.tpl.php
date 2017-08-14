@@ -14,10 +14,14 @@
 
 <div id="two-col-left-main">
   <p class="subtitle-first"><?php print $upitt_date; ?></p>
+  <?php if (isset($upitt_creator)) : ?>
   <p class="subtitle"><?php print $upitt_creator; ?></p>
+  <?php endif; ?>
   <p class="subtitle"><?php print $upitt_viewer_link; ?></p>
   <div id="main-content"> 
+    <?php if (isset($upitt_object_view)): ?>
     <?php print $upitt_object_view; ?> 
+    <?php endif; ?>
     <?php print $upitt_lg_thumb; ?> 
   </div><!-- /end main-content -->
   <div id="sidebar"> 
