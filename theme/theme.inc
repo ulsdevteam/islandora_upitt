@@ -26,6 +26,8 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
       $tn_url = url("islandora/object/{$islandora_object->id}/datastream/TN_LARGE/view");
     } elseif (isset($islandora_object['TN'])) {
       $tn_url = url("islandora/object/{$islandora_object->id}/datastream/TN/view");
+    } else {
+      $tn_url = '';
     }
     $params = array(
       'title' => $islandora_object->label,
