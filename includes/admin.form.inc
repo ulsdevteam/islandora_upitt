@@ -17,6 +17,8 @@
  *   The Drupal form definition.
  */
 function islandora_upitt_admin_settings(array $form, array &$form_state) {
+  global $base_url;
+
   $form = array(
     'options_0' => array(
       '#type' => 'fieldset',
@@ -25,7 +27,7 @@ function islandora_upitt_admin_settings(array $form, array &$form_state) {
         '#type' => 'textfield',
         '#title' => t('DNS domain name for this site.'),
         '#description' => t('This should be the full domain value for the given site such as "http://www.historicpittsburgh.org/".'),
-        '#default_value' => variable_get('islandora_upitt_dns_domain'),
+        '#default_value' => variable_get('islandora_upitt_dns_domain', $base_url),
       ),
     ),
     'options_1' => array(
