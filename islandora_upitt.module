@@ -81,8 +81,10 @@ function islandora_upitt_menu_alter(&$items) {
   //  $items['islandora/object/%islandora_object/view']['page arguments'] = array(2);
 }
 
+
 function islanora_upitt_view($islandora_object) {
   if (in_array('islandora:collectionCModel', $islandora_object->models) === FALSE) {
+    islandora_upitt_insert_canonical_object_link($islandora_object);
     return theme('islandora_upitt_view', array('islandora_object' => $islandora_object));
   }
   else {
@@ -548,4 +550,62 @@ function islandora_upitt_add_transcript_tab($tabs, $islandora_object) {
     $tabs['#primary'][] = $primary;
   }
   return $tabs;  
+}
+
+/**
+ * This will insert the canonical object link for islandora objects for several URL paths after
+ * looking up whether or not the path has an alias defined.
+ * 
+ * When the path has "/from_search/", the viewer path is used 
+ *   ("islandora/object/" . $islandora_object->id . "/viewer").
+ */
+function islandora_upitt_insert_canonical_object_link($islandora_object) {
+  $item = menu_get_item();
+  // Based on menu route ($item['path']), set the canonical link
+  switch ($item['path']) {
+    case 'islandora/object/%':
+    case 'islandora/object/%/viewer':
+    case 'islandora/object/%/from_search/%':
+      // Get the path for this object
+      $path = implode("/", $item['original_map']);
+      $path = (strstr($path, '/from_search/') ? "islandora/object/" . $islandora_object->id . "/viewer" : $path);
+
+      // Lookup the alias.
+      $alias_path = drupal_lookup_path('alias', $path, 'und');
+
+      // Only update the path value if an alias was found.
+      $use_path = ($alias_path ? $alias_path : $path);
+      drupal_add_html_head_link(array('rel' => 'canonical',
+        'href' => islandora_upitt_get_my_domain() . $use_path));
+      break;
+  }
+}
+
+/**
+ * Implements hook_islandora_view_object().
+ *
+ * Add the canonical link to any /viewer page for islandora objects.
+ */
+function islandora_upitt_islandora_view_object($object) {
+  $item = menu_get_item();
+
+  // Get the path for this object
+  $path = implode("/", $item['original_map']);
+  $path = (strstr($path, '/from_search/') ? "islandora/object/" . $object->id : $path);
+
+  // Lookup the alias if it exists.
+  $alias_path = drupal_lookup_path('alias', $path, 'und');
+
+  // Only update the path value if an alias was found.
+  $use_path = ($alias_path ? $alias_path : $path);
+  drupal_add_html_head_link(array('rel' => 'canonical',
+    'href' => islandora_upitt_get_my_domain() . $use_path));
+}
+
+/**
+ * This will return the value of the islandora_upitt_dns_domain, or the _SERVER value if the variable is not set.
+ */
+function islandora_upitt_get_my_domain() {
+  return rtrim(variable_get('islandora_upitt_dns_domain', 
+    ((isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'])), '/') . '/';
 }

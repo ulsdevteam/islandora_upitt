@@ -18,7 +18,17 @@
  */
 function islandora_upitt_admin_settings(array $form, array &$form_state) {
   $form = array(
-    'options' => array(
+    'options_0' => array(
+      '#type' => 'fieldset',
+      '#title' => t('DNS domain'),
+      'dns_domain' => array(
+        '#type' => 'textfield',
+        '#title' => t('DNS domain name for this site.'),
+        '#description' => t('This should be the full domain value for the given site such as "http://www.historicpittsburgh.org/".'),
+        '#default_value' => variable_get('islandora_upitt_dns_domain'),
+      ),
+    ),
+    'options_1' => array(
       '#type' => 'fieldset',
       '#title' => t('Site Jump'),
       'show_sitejump' => array(
@@ -65,12 +75,14 @@ function islandora_upitt_admin_settings_submit(array $form, array &$form_state) 
   $id = $form_state['triggering_element']['#id'];
   switch ($id) {
     case 'edit-submit':
+      variable_set('islandora_upitt_dns_domain', $form_state['values']['dns_domain']);
       variable_set('islandora_upitt_show_sitejump', $form_state['values']['show_sitejump']);
       variable_set('islandora_upitt_sitejump_domain', $form_state['values']['sitejump_domain']);
       variable_set('islandora_upitt_sitejump_tab_text', $form_state['values']['sitejump_tab_text']);
       break;
 
     case 'edit-reset':
+      variable_del('islandora_upitt_dns_domain');
       variable_del('islandora_upitt_show_sitejump');
       variable_del('islandora_upitt_sitejump_domain');
       variable_del('islandora_upitt_sitejump_tab_text');
