@@ -480,8 +480,8 @@ function islandora_upitt_preprocess_page(&$variables) {
   $item = menu_get_item();
   if (is_array($item)) {
     $islandora_object = menu_get_object('islandora_object', 2);
-    if (is_object($islandora_object) && ($item['path'] == 'islandora/object/%/from_search/%' ||
-      $item['path'] == 'islandora/object/%/viewer')) {
+    if (is_object($islandora_object) && (isset($islandora_object['TRANSCRIPT']) && ($item['path'] == 'islandora/object/%/from_search/%' ||
+      $item['path'] == 'islandora/object/%/viewer')))   {
       $variables['tabs'] = islandora_upitt_add_transcript_tab($variables['tabs'], $islandora_object);
     }
 
