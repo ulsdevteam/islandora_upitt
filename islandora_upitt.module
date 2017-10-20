@@ -81,8 +81,10 @@ function islandora_upitt_menu_alter(&$items) {
   //  $items['islandora/object/%islandora_object/view']['page arguments'] = array(2);
 }
 
+
 function islanora_upitt_view($islandora_object) {
   if (in_array('islandora:collectionCModel', $islandora_object->models) === FALSE) {
+    islandora_upitt_insert_canonical_object_link($islandora_object);
     return theme('islandora_upitt_view', array('islandora_object' => $islandora_object));
   }
   else {
@@ -477,6 +479,12 @@ function _get_solr_query_results($query, $field, $single_result = TRUE, $pid = '
 function islandora_upitt_preprocess_page(&$variables) {
   $item = menu_get_item();
   if (is_array($item)) {
+    $islandora_object = menu_get_object('islandora_object', 2);
+    if (is_object($islandora_object) && (isset($islandora_object['TRANSCRIPT']) && ($item['path'] == 'islandora/object/%/from_search/%' ||
+      $item['path'] == 'islandora/object/%/viewer')))   {
+      $variables['tabs'] = islandora_upitt_add_transcript_tab($variables['tabs'], $islandora_object);
+    }
+
     $access_denied_vid = str_replace("node/", "", variable_get('site_403'));
     if (count($item['map']) > 1) {
       if ($item['map'][0] == 'node' && is_object($item['map'][1]) && $item['map'][1]->vid == $access_denied_vid &&
@@ -555,4 +563,107 @@ function islandora_upitt_get_jp2_dimensions($object) {
     list($width, $height, $type, $attr) = $image_size;
     return array('width' => $width, 'height' => $height);
   }
+}
+
+function islandora_upitt_add_transcript_tab($tabs, $islandora_object) {
+  $transcript_tab_exists = FALSE;
+  if (array_key_exists('#primary', $tabs) && is_array($tabs['#primary'])) {
+    foreach ($tabs['#primary'] as $tab) {
+      if (array_key_exists('#link', $tab)) {
+        $transcript_tab_exists |= ($tab['#link']['title'] == 'Manage');
+      }
+    }
+  }
+
+  if (!$transcript_tab_exists) {
+    $primary = array(
+      '#theme' => 'menu_local_task',
+      '#link' => array(
+        'path' => 'islandora/object/%/manage',
+        'load_functions' => array(
+          '2' => 'islandora_object_load'
+        ),
+        'to_arg_functions' => '',
+        'access_callback' => 'islandora_transcript_view_access',
+        'access_arguments' => 'a:1:{i:0;i:2;}',
+        'page_callback' => 'islandora_transcript_view',
+        'page_arguments' => 'a:1:{i:0;i:2;}',
+        'delivery_callback' => '',
+        'fit' => '13',
+        'number_parts' => '4',
+        'context' => '1',
+        'tab_parent' => 'islandora/object/%/viewer',
+        'tab_root' => 'islandora/object/%/viewer',
+        'title' => 'Transcript',
+        'title_callback' => 't',
+        'title_arguments' => '',
+        'theme_callback' => '',
+        'theme_arguments' => 'a:0:{}',
+        'type' => '132',
+        'description' => '',
+        'position' => '',
+        'weight' => '0',
+        'include_file' => '',
+        'href' => 'islandora/object/' . $islandora_object->id . '/transcript',
+        'tab_root_href' => 'islandora/object/' . $islandora_object->id,
+        'tab_parent_href' => 'islandora/object/' . $islandora_object->id,
+        'options' => array(),
+        'access' => TRUE,
+        'localized_options' => array(),
+      ), // end of #link array
+    );
+    $tabs['#primary'][] = $primary;
+  }
+  return $tabs;  
+}
+
+/**
+ * This will insert the canonical object link for islandora objects for several URL paths after
+ * looking up whether or not the path has an alias defined.
+ * 
+ * When the path has "/from_search/", the viewer path is used 
+ *   ("islandora/object/" . $islandora_object->id . "/viewer").
+ */
+function islandora_upitt_insert_canonical_object_link($islandora_object) {
+  $item = menu_get_item();
+  // Based on menu route ($item['path']), set the canonical link
+  switch ($item['path']) {
+    case 'islandora/object/%':
+    case 'islandora/object/%/viewer':
+    case 'islandora/object/%/from_search/%':
+      islandora_upitt_add_canonical_to_menu_item($item, '/viewer');
+      break;
+  }
+}
+
+/**
+ * Implements hook_islandora_view_object().
+ *
+ * Add the canonical link to any /viewer page for islandora objects.
+ */
+function islandora_upitt_islandora_view_object($object) {
+  $item = menu_get_item();
+  islandora_upitt_add_canonical_to_menu_item($item);
+}
+
+function islandora_upitt_add_canonical_to_menu_item($item, $verb = '') {
+  // Get the path for this object
+  $path = implode("/", $item['original_map']);
+  $path = (strstr($path, '/from_search/') ? "islandora/object/" . $islandora_object->id . $verb : $path);
+
+  // Lookup the alias.
+  $alias_path = drupal_lookup_path('alias', $path, 'und');
+
+  // Only update the path value if an alias was found.
+  $use_path = ($alias_path ? $alias_path : $path);
+  drupal_add_html_head_link(array('rel' => 'canonical',
+    'href' => islandora_upitt_get_my_domain() . $use_path));
+}
+
+/**
+ * This will return the value of the islandora_upitt_dns_domain, or the _SERVER value if the variable is not set.
+ */
+function islandora_upitt_get_my_domain() {
+  global $base_url;
+  return rtrim(variable_get('islandora_upitt_dns_domain', $base_url), '/') . '/';
 }
