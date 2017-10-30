@@ -500,6 +500,71 @@ function islandora_upitt_preprocess_page(&$variables) {
   }
 }
 
+/**
+ * Implements hook_islandora_overview_object_alter().
+ *
+ * If viewing a book, this will check the size of an page's image JP2 against
+ * the size of the OBJ.  If they do not match, a message is displayed that will
+ * link to regenerating the JP2 if permission allows - else, it will only
+ * notify the user that the OBJ and JP2 page sizes do not match.
+ */
+function islandora_upitt_islandora_overview_object_alter(AbstractObject &$object, &$output) {
+  global $user;
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+
+  if (islandora_upitt_is_paged_object($object)) {
+    if (module_exists('upitt_workflow')) {
+      $pages = islandora_paged_content_get_pages($object);
+      $page = array_pop($pages);
+      if ($page) {
+        $user_can_process_barcodes = (user_access(ISLANDORA_WORKFLOW_PROCESS_BARCODES, $user));
+        $page_object = islandora_object_load($page['pid']);
+        $page_jp2_dimensions = islandora_upitt_get_jp2_dimensions($page_object);
+        if ($page['width'] <> $page_jp2_dimensions['width'] ||
+            $page['height'] <> $page_jp2_dimensions['height']) {
+          @list($namespace, $barcode_of_object) = explode(":", $object->id);
+          $link_options = array(
+            'query' => array(
+              'mode' => 'make_jp2',
+              'barcodes' => $barcode_of_object,
+            ),
+            'attributes' => array('target'=>'_blank'),
+          );
+
+          $l = $user_can_process_barcodes ? 
+              l('Regenerate JP2 for ' . $object->id, '/workflow/workflowadmin/process_barcodes/', $link_options) :
+              t('Please contact somebody who can regenrate the JP2 for ' . $object->id . '.');
+          drupal_set_message(t('The page JP2 is not the same size as the OBJ master file.  This book will need to have the JP2 regenerated.') .
+            '<ul><li>JP2 is ' . $page_jp2_dimensions['width'] . ', ' . $page_jp2_dimensions['height'] . '</li>' .
+            '<li>OBJ is ' . $page['width'] . ', ' . $page['height'] . '</li></ul>' .
+            $l, 'error');
+        }
+      }
+    }
+  }
+}
+
+function islandora_upitt_is_paged_object($islandora_object) {
+  return (is_object($islandora_object)) ? (!(array_search('islandora:bookCModel', $islandora_object->models) === FALSE) ||
+    !(array_search('islandora:newspaperIssueCModel', $islandora_object->models) === FALSE) ||
+    !(array_search('islandora:manuscriptCModel', $islandora_object->models) === FALSE) ) : FALSE;
+}
+
+/**
+ * Use the JP2 to derive the image size.
+ */
+function islandora_upitt_get_jp2_dimensions($object) {
+  if (isset($object["JP2"])) {
+    // use getimagesize on it
+    $saved_jp2 = tempnam(variable_get('file_temporary_path', '/tmp'), '_jp2_dimensions_check_');
+    $object["JP2"]->getContent($saved_jp2);
+    $image_size = getimagesize($saved_jp2);
+    @unlink($saved_jp2);
+    list($width, $height, $type, $attr) = $image_size;
+    return array('width' => $width, 'height' => $height);
+  }
+}
+
 function islandora_upitt_add_transcript_tab($tabs, $islandora_object) {
   $transcript_tab_exists = FALSE;
   if (array_key_exists('#primary', $tabs) && is_array($tabs['#primary'])) {
