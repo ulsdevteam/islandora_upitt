@@ -667,3 +667,22 @@ function islandora_upitt_get_my_domain() {
   global $base_url;
   return rtrim(variable_get('islandora_upitt_dns_domain', $base_url), '/') . '/';
 }
+
+/**
+ * This adds a placeholder to the simple and advanced search forms
+ * Implements hook_form_alter().
+ */
+function islandora_upitt_form_alter( &$form, &$form_state, $form_id ) {
+  switch ($form_id) {
+    case 'islandora_solr_advanced_search_form':
+      foreach ($form['terms'] as $k => $v) {
+        if (array_key_exists('search', $form['terms'][$k])) {
+          $form['terms'][$k]['search']['#attributes']['placeholder'][] = t( 'Refine this search...' );
+        }
+      }
+      break;
+    case 'islandora_solr_simple_search_form':
+      $form['simple']['islandora_simple_search_query']['#attributes']['placeholder'][] = t( 'Search all collections...' );
+      break;
+  }
+}
