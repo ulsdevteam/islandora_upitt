@@ -460,7 +460,8 @@ function _get_solr_query_results($query, $field, $single_result = TRUE, $pid = '
     foreach ($solr_result_objects as $object) {
       if (($single_result && $i < 1) || !($single_result)) {
         $cur_value = (isset($object['solr_doc'][$field]) && is_array($object['solr_doc'][$field])) ? implode(", ", $object['solr_doc'][$field]) : $object['solr_doc'][$field];
-        if (!($field == 'RELS_EXT_isMemberOfCollection_uri_ms' && $cur_value == 'info:fedora/pitt:root')) {
+        if (!($field == 'RELS_EXT_isMemberOfCollection_uri_ms' && $cur_value == 'info:fedora/pitt:root') && 
+          (isset($object['solr_doc'][$field]))) {
           $values[] = (is_array($object['solr_doc'][$field])) ? implode(", ", array_unique($object['solr_doc'][$field])) : $object['solr_doc'][$field];
           $i++;
         }
@@ -631,7 +632,7 @@ function islandora_upitt_insert_canonical_object_link($islandora_object) {
     case 'islandora/object/%':
     case 'islandora/object/%/viewer':
     case 'islandora/object/%/from_search/%':
-      islandora_upitt_add_canonical_to_menu_item($item, '/viewer');
+      islandora_upitt_add_canonical_to_menu_item($item, '/viewer', $islandora_object);
       break;
   }
 }
@@ -643,10 +644,10 @@ function islandora_upitt_insert_canonical_object_link($islandora_object) {
  */
 function islandora_upitt_islandora_view_object($object) {
   $item = menu_get_item();
-  islandora_upitt_add_canonical_to_menu_item($item);
+  islandora_upitt_add_canonical_to_menu_item($item, '', $object);
 }
 
-function islandora_upitt_add_canonical_to_menu_item($item, $verb = '') {
+function islandora_upitt_add_canonical_to_menu_item($item, $verb = '', $islandora_object) {
   // Get the path for this object
   $path = implode("/", $item['original_map']);
   $path = (strstr($path, '/from_search/') ? "islandora/object/" . $islandora_object->id . $verb : $path);
