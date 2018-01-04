@@ -678,7 +678,7 @@ function islandora_upitt_form_alter( &$form, &$form_state, $form_id ) {
   switch ($form_id) {
     case 'islandora_solr_advanced_search_form':
       foreach ($form['terms'] as $k => $v) {
-        if (array_key_exists('search', $form['terms'][$k])) {
+        if (is_array($form['terms'][$k]) && array_key_exists('search', $form['terms'][$k])) {
           $form['terms'][$k]['search']['#attributes']['placeholder'][] = t( 'Refine this search...' );
         }
       }
