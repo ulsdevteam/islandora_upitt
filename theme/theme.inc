@@ -35,6 +35,38 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
       'path' => $tn_url);
     $variables['upitt_lg_thumb'] = ($tn_url) ? l(theme('image', $params), $url, array('html' => TRUE)) : '';
 
+    module_load_include('inc', 'islandora', 'includes/datastream');
+    $datastreams = array();
+    $display_these_dsids_arr = variable_get('islandora_upitt_display_dsids');
+    $view_in_browser_dsids_arr = variable_get('islandora_upitt_view_in_browser_dsids');
+
+    $object_solr_fields = array();
+    module_load_include('inc', 'islandora_upitt', 'includes/solr');
+    foreach ($islandora_object as $ds) {
+      try {
+        $dsid = strtoupper($ds->id);
+        if (!array_search($dsid, $display_these_dsids_arr) === FALSE) {
+          $pid = $islandora_object->id;
+          $id = $ds->id;
+          $label = $ds->label;
+          $get_url_type = (!(array_search($dsid, $view_in_browser_dsids_arr) === FALSE)) ?
+            'view' : 'download';
+          $download_path = islandora_datastream_get_url($ds, $get_url_type);
+          $datastreams[$id]['label'] = $label;
+          $download_prohibit_reasons = islandora_upitt_download_prohibit_reason($dsid, $islandora_object, $object_solr_fields);
+          $datastreams[$id]['download_prohibit_reasons'] = $download_prohibit_reasons;
+          $datastreams[$id]['label_link'] = islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $ds) ?
+            l($label, $download_path) : 'Access denied';
+          $datastreams[$id]['download_url'] = $download_path;
+          $datastreams[$id]['size'] = islandora_datastream_get_human_readable_size($ds);
+          $datastreams[$id]['class'] = drupal_strtolower(preg_replace('/[^A-Za-z0-9]/', '-', $id));
+        }
+      }
+      catch (RepositoryException $e) {
+      }
+    }
+    $variables['datastreams'] = $datastreams;
+
     if (isset($islandora_object['MODS'])) {
       $block = module_invoke('upitt_discovery_system_links_block', 'block_view', 'discovery_system_links_block');
       $variables['discovery_links_block'] = render($block['content']);

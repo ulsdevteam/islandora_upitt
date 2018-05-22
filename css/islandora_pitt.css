@@ -1,0 +1,27 @@
+.right_align {
+  text-align: right;
+}
+
+.file_details {
+  width: 100%;
+  display: block;
+  clear: both;
+  border: none;
+}
+
+.file_details table {
+  margin-top: 8px;
+}
+
+.file_details legend {
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.fieldset-legend {
+  font-size: 1.25em;
+}
+
+.file_details table tr td, .file_details table tr th {
+  padding-right: 6px;
+}

@@ -74,6 +74,10 @@ function islandora_upitt_menu_alter(&$items) {
   $items['islandora/object/%islandora_object/view']['page callback'] = 'islanora_upitt_view';
   $items['islandora/object/%islandora_object/view']['title'] = 'Metadata';
 
+  // Update the access callback for datastream download / view access.
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['access callback'] = 'islandora_upitt_datastream_access';
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['access arguments'] = array(ISLANDORA_VIEW_OBJECTS, 2, 4);
+
   // TODO - FIXME... the "page argument" menu route parameter values need to be provided for each callback,
   // but since this was never working before it will need to be tested.  The following two lines should be
   // uncommented -- and then test all relevant pages.
@@ -486,6 +490,8 @@ function islandora_upitt_preprocess_page(&$variables) {
       $item['path'] == 'islandora/object/%/viewer')))   {
       $variables['tabs'] = islandora_upitt_add_transcript_tab($variables['tabs'], $islandora_object);
     }
+    $path = drupal_get_path('module', 'islandora_upitt');
+    drupal_add_css($path . '/css/islandora_pitt.css');
 
     $access_denied_vid = str_replace("node/", "", variable_get('site_403'));
     if (count($item['map']) > 1) {
@@ -687,4 +693,37 @@ function islandora_upitt_form_alter( &$form, &$form_state, $form_id ) {
       $form['simple']['islandora_simple_search_query']['#attributes']['placeholder'][] = t( 'Search all collections...' );
       break;
   }
+}
+
+/**
+ * This overrides the menu access callback function.
+ *
+ * This will perform the same access check and then also check whether or not the specific datastream should
+ * be able to be viewed or downloaded based on the configuration and potentially copyright restrictions on 
+ * a datastream.
+ *
+ * @param string $permission
+ *   The access permission to check.
+ * @param object $islandora_object
+ *   Fedora (Islandora) object
+ * @param object $datastream
+ *   Fedora datastream object.
+ *
+ * @return boolean
+ *   Whether or not access to the specific datastream is allowed for the user.
+ */
+function islandora_upitt_datastream_access($permission, $islandora_object, $datastream) {
+  module_load_include('inc', 'islandora', 'islandora');
+  module_load_include('inc', 'islandora', 'includes/datastream');
+  $object_solr_fields = array();
+  $inherited_access = $download_prohibit_reasons = FALSE;
+  if (is_object($islandora_object)) {
+    module_load_include('inc', 'islandora_upitt', 'includes/solr');
+    if (is_object($datastream)) {
+      $inherited_access = islandora_datastream_access($permission, $datastream);
+      $dsid = strtoupper($datastream->id);
+      $download_prohibit_reasons = islandora_upitt_download_prohibit_reason($dsid, $islandora_object, $object_solr_fields);
+    }
+  }
+  return ($inherited_access && ($download_prohibit_reasons == ''));
 }
