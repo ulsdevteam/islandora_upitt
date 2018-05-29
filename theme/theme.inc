@@ -37,8 +37,8 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
 
     module_load_include('inc', 'islandora', 'includes/datastream');
     $datastreams = array();
-    $display_these_dsids_arr = variable_get('islandora_upitt_display_dsids');
-    $view_in_browser_dsids_arr = variable_get('islandora_upitt_view_in_browser_dsids');
+    $display_these_dsids_arr = variable_get('islandora_upitt_display_dsids', array());
+    $view_in_browser_dsids_arr = variable_get('islandora_upitt_view_in_browser_dsids', array());
 
     $object_solr_fields = array();
     module_load_include('inc', 'islandora_upitt', 'includes/solr');
