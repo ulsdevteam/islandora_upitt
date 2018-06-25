@@ -74,9 +74,9 @@ function islandora_upitt_download_prohibit_reason($dsid, $islandora_object, $obj
     }
 
     // Look at the object's copyright status field
-    $copyright_status = (array_key_exists('mods_accessCondition_copyright_copyright_status_ms', $object_solr_fields[$islandora_object->id])) ?
+    $copyright_status = ($object_solr_fields && array_key_exists('mods_accessCondition_copyright_copyright_status_ms', $object_solr_fields[$islandora_object->id])) ?
        strtolower($object_solr_fields[$islandora_object->id]['mods_accessCondition_copyright_copyright_status_ms']) : '';
-/*    $publication_status = (array_key_exists('mods_accessCondition_copyright_publication_status_ms', $object_solr_fields[$islandora_object->id])) ?
+/*    $publication_status = ($object_solr_fields && array_key_exists('mods_accessCondition_copyright_publication_status_ms', $object_solr_fields[$islandora_object->id])) ?
 *       strtolower($object_solr_fields[$islandora_object->id]['mods_accessCondition_copyright_publication_status_ms']) : '';
 */
 
