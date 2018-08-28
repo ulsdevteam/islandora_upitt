@@ -259,7 +259,7 @@ function islandora_upitt_token_info() {
           'description' => t("Search dc.subject	for value."),),
         'search_description' => array(
           'name' => t("Search Description"),
-          'description' => t("Search mods_abstract_mt for value."),),
+          'description' => t("Search mods_abstract_ms for value."),),
         'search_date' => array(
           'name' => t("Search Date"),
           'description' => t("Search mods_originInfo_dateOther_ms for value."),),
@@ -305,7 +305,7 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
   $sanitize = !empty($options['sanitize']);
   $replacements = array();
   if ($type == 'gaSearchTracking') {
-    $token_to_solrfield_mapping = array('search_all' => 'catch_all_fields_mt', 'search_title' => 'dc.title', 'search_subject' => 'dc.subject', 'search_description' => 'mods_abstract_mt', 
+    $token_to_solrfield_mapping = array('search_all' => 'catch_all_fields_mt', 'search_title' => 'dc.title', 'search_subject' => 'dc.subject', 'search_description' => 'mods_abstract_ms', 
       'search_date' => 'mods_originInfo_dateOther_ms', 'search_creator' => 'dc.creator', 'search_identifier' => 'dc.identifier', 
       'facet_creator' => 'mods_name_creator_namePart_ms', 'facet_type' => 'mods_typeOfResource_ms', 'facet_source' => 'mods_relatedItem_host_titleInfo_title_ms', 
       'facet_subject' => 'mods_subject_topic_ms', 'facet_collection' => 'RELS_EXT_isMemberOfCollection_uri_ms', 'facet_depositor' => 'mods_name_depositor_namePart_ms', 
