@@ -340,7 +340,8 @@ function islandora_upitt_tokens($type, $tokens, array $data = array(), array $op
     $islandora_object = menu_get_object('islandora_object', 2);
     if (!is_object($islandora_object)) {
       $items = menu_get_item();
-      $islandora_object = (is_array($items['page_arguments']) && is_array($items['page_arguments']) && is_string($items['page_arguments'][0])) ? NULL : (is_array($items['page_arguments']) ? $items['page_arguments'][0] : NULL);
+//      $islandora_object = (is_array($items['page_arguments']) && is_array($items['page_arguments']) && is_string($items['page_arguments'][0])) ? NULL : (is_array($items['page_arguments']) ? $items['page_arguments'][0] : NULL);
+      $islandora_object = (is_array($items['page_arguments']) && array_key_exists(0, $items['page_arguments']) && is_string($items['page_arguments'][0])) ? NULL : (array_key_exists(0, $items['page_arguments']) ? $items['page_arguments'][0] : NULL);
     }
     $islandora_object = (is_object($islandora_object) && get_class($islandora_object) == 'IslandoraFedoraObject') ? $islandora_object : NULL;
     if ($islandora_object) {
