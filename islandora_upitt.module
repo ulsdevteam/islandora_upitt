@@ -130,7 +130,9 @@ function islandora_upitt_xml_form_builder_get_self_transforms() {
 function islandora_upitt_sitejump() {
   if (variable_get('islandora_upitt_show_sitejump') == 1) {
     $path = str_replace(":", "%3A", current_path());
-    drupal_goto(variable_get('islandora_upitt_sitejump_domain', 'http://gamera.library.pitt.edu') . $path);
+    $path = str_replace("sitejump", "manage", $path);
+    $goto_url = rtrim(variable_get('islandora_upitt_sitejump_domain', 'https://gamera.library.pitt.edu'), '/') . '/' . $path;
+    drupal_goto($goto_url);
   }
 }
 
