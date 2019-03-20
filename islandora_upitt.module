@@ -522,7 +522,43 @@ function islandora_upitt_preprocess_page(&$variables) {
 function islandora_upitt_islandora_overview_object_alter(AbstractObject &$object, &$output) {
   global $user;
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-
+  if (array_key_exists('collection', $output) && array_key_exists('#markup', $output['collection'])) {
+    @list($prefix_keep, $output_lines) = explode("<tbody>", $output['collection']['#markup']);
+    @list($output_lines, $suffix_keep) = explode("</tbody>", $output_lines);
+    $output_lines_arr = explode(chr(10), $output_lines);
+    $new_output = $prefix_keep . '<tbody>
+';
+    $model_mappings = array(
+      'islandora:findingAidCModel' => 'Finding Aid', 
+      'islandora:collectionCModel' => 'Collection',
+      'islandora:bookCModel' => 'Book',
+      'islandora:manuscriptCModel' => 'Manuscript',
+      'islandora:newspaperIssueCModel' => 'Newspaper Issue',
+      'islandora:newspaperCModel' => 'Newspaper',
+    );
+    foreach ($output_lines_arr as $output_line) {
+      $output_line = trim($output_line);
+      if ($output_line) {
+        @list($prefix_line_junk, $keep) = explode("/islandora/object/", $output_line);
+        @list($keep, $suffix_line_junk) = explode("\"", $keep);
+        $pid = str_replace("%3A", ":", $keep);
+        $islandora_obj = islandora_object_load($pid);
+        if (is_object($islandora_obj)) {
+          $models = $islandora_obj->models;
+          if (($key = array_search('fedora-system:FedoraObject-3.0', $models)) !== false) {
+            unset($models[$key]);
+          }
+          $model = array_pop($models);
+          $model = (array_key_exists($model, $model_mappings) ? $model_mappings[$model] : $model);
+          $output_line = str_replace("</a>", "</a> - <b>" . $model . '</b>' , $output_line);
+        }
+        $new_output .= $output_line;
+      }
+    }
+  $output['collection']['#markup'] = $new_output . '
+</tbody>
+ ' . $suffix_keep;
+  }
   if (islandora_upitt_is_paged_object($object)) {
     if (module_exists('upitt_workflow')) {
       $pages = islandora_paged_content_get_pages($object);
