@@ -31,6 +31,7 @@
     <?php print $discovery_links_block; ?>
   </div><!-- /end sidebar -->
 
+<?php if (count($datastreams) > 0) : ?>
   <fieldset class="file_details">
     <legend><span class="fieldset-legend"><?php print t('Resources'); ?></span></legend>
     <table>
@@ -49,5 +50,6 @@
       <?php endforeach; ?>
     </table>
   </fieldset>
+<?php endif; ?>
 
 </div><!-- /end two-col-left-main -->
