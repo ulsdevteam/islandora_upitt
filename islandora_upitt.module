@@ -62,6 +62,7 @@ function islandora_upitt_viewer_aaccess_callback($permission, $islandora_object)
 
 
   if(islandora_object_access_callback($permission, $islandora_object) && in_array('islandora:collectionCModel', $islandora_object->models) == FALSE) {
+    error_log(print_r($islandora_object, true));
     return TRUE;
   }
   else {
@@ -490,7 +491,7 @@ function islandora_upitt_preprocess_page(&$variables) {
   if (is_array($item)) {
     $islandora_object = menu_get_object('islandora_object', 2);
     if (is_object($islandora_object) && (isset($islandora_object['TRANSCRIPT']) && ($item['path'] == 'islandora/object/%/from_search/%' ||
-      $item['path'] == 'islandora/object/%/viewer')))   {
+      $item['path'] == 'islandora/object/%' || $item['path'] == 'islandora/object/%/viewer')))   {
       $variables['tabs'] = islandora_upitt_add_transcript_tab($variables['tabs'], $islandora_object);
     }
     $path = drupal_get_path('module', 'islandora_upitt');
@@ -639,8 +640,8 @@ function islandora_upitt_add_transcript_tab($tabs, $islandora_object) {
         'fit' => '13',
         'number_parts' => '4',
         'context' => '1',
-        'tab_parent' => 'islandora/object/%/viewer',
-        'tab_root' => 'islandora/object/%/viewer',
+        'tab_parent' => 'islandora/object/%',
+        'tab_root' => 'islandora/object/%',
         'title' => 'Transcript',
         'title_callback' => 't',
         'title_arguments' => '',
@@ -667,9 +668,6 @@ function islandora_upitt_add_transcript_tab($tabs, $islandora_object) {
 /**
  * This will insert the canonical object link for islandora objects for several URL paths after
  * looking up whether or not the path has an alias defined.
- * 
- * When the path has "/from_search/", the viewer path is used 
- *   ("islandora/object/" . $islandora_object->id . "/viewer").
  */
 function islandora_upitt_insert_canonical_object_link($islandora_object) {
   $item = menu_get_item();
@@ -678,7 +676,7 @@ function islandora_upitt_insert_canonical_object_link($islandora_object) {
     case 'islandora/object/%':
     case 'islandora/object/%/viewer':
     case 'islandora/object/%/from_search/%':
-      islandora_upitt_add_canonical_to_menu_item($item, '/viewer', $islandora_object);
+      islandora_upitt_add_canonical_to_menu_item($item, '', $islandora_object);
       break;
   }
 }
@@ -696,7 +694,8 @@ function islandora_upitt_islandora_view_object($object) {
 function islandora_upitt_add_canonical_to_menu_item($item, $verb = '', $islandora_object) {
   // Get the path for this object
   $path = implode("/", $item['original_map']);
-  $path = (strstr($path, '/from_search/') ? "islandora/object/" . $islandora_object->id . $verb : $path);
+  $path = ((strstr($path, '/from_search/') || strstr($path, '/viewer'))
+      ? "islandora/object/" . $islandora_object->id . $verb : $path);
 
   // Lookup the alias.
   $alias_path = drupal_lookup_path('alias', $path, 'und');
