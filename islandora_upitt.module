@@ -73,6 +73,8 @@ function islandora_upitt_viewer_aaccess_callback($permission, $islandora_object)
 function islandora_upitt_menu_alter(&$items) {
   $items['islandora/object/%islandora_object']['page callback'] = 'islanora_upitt_view';
   $items['islandora/object/%islandora_object/view']['page callback'] = 'islanora_upitt_view';
+  $items['islandora/object/%islandora_object/view']['page arguments'] = array(2);
+
   $items['islandora/object/%islandora_object/view']['title'] = 'Metadata';
 
   // Update the access callback for datastream download / view access.
