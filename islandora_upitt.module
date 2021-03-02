@@ -62,7 +62,7 @@ function islandora_upitt_viewer_aaccess_callback($permission, $islandora_object)
 
 
   if(islandora_object_access_callback($permission, $islandora_object) && in_array('islandora:collectionCModel', $islandora_object->models) == FALSE) {
-    error_log(print_r($islandora_object, true));
+    #error_log(print_r($islandora_object, true));
     return TRUE;
   }
   else {
