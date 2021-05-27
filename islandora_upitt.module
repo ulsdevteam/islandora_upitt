@@ -1,6 +1,8 @@
 <?php
 
 define('UPITT_SITEJUMP', 'View sitejump link');
+define('UPITT_LOCAL_MENU', 'Show local menu tabs');
+define('UPITT_TRANSCRIPT_MENU', 'Show transcript menu tabs');
 
 /**
 	* @file
@@ -52,7 +54,7 @@ function islandora_upitt_menu() {
 
   return $items;
 }
-function islandora_upitt_viewer_aaccess_callback($permission, $islandora_object) {
+function islandora_upitt_viewer_access_callback($permission, $islandora_object) {
   /*
   drupal_static_reset('islandora_get_tuque_connection');
   $connection = islandora_get_tuque_connection();
@@ -70,6 +72,10 @@ function islandora_upitt_viewer_aaccess_callback($permission, $islandora_object)
   }
 }
 
+/*
+ * Implements hook_menu_alter.
+ */
+
 function islandora_upitt_menu_alter(&$items) {
   $items['islandora/object/%islandora_object']['page callback'] = 'islanora_upitt_view';
   $items['islandora/object/%islandora_object/view']['page callback'] = 'islanora_upitt_view';
@@ -81,11 +87,23 @@ function islandora_upitt_menu_alter(&$items) {
   $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['access callback'] = 'islandora_upitt_datastream_access';
   $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['access arguments'] = array(ISLANDORA_VIEW_OBJECTS, 2, 4);
 
+  // Update the access callback for local menu permissions
+  $items['islandora/object/%islandora_object']['access callback'] = 'islandora_upitt_local_menu_access_callback';
+  $items['islandora/object/%islandora_object']['access callback'] = 'islandora_upitt_transcript_menu_access_callback';
+
   // TODO - FIXME... the "page argument" menu route parameter values need to be provided for each callback,
   // but since this was never working before it will need to be tested.  The following two lines should be
   // uncommented -- and then test all relevant pages.
   //  $items['islandora/object/%islandora_object']['page arguments'] = array(2);
   //  $items['islandora/object/%islandora_object/view']['page arguments'] = array(2);
+}
+
+function islandora_upitt_local_menu_access_callback() {
+  return user_access(UPITT_LOCAL_MENU, $user);
+}
+
+function islandora_upitt_transcript_menu_access_callback() {
+  return user_access(UPITT_TRANSCRIPT_MENU, $user);
 }
 
 
@@ -224,6 +242,14 @@ function islandora_upitt_permission() {
     UPITT_SITEJUMP => array(
       'title' => t('View Sitejump link'),
       'description' => t('Sitejump to STAFF website will be available on islandora content pages.'),
+    ),
+    UPITT_LOCAL_MENU_VIEW => array(
+      'title' => t('Hides local menus on Islandora Object pages'),
+      'description' => t('Whether a user should have local menus visible on islandora content pages. '),
+    ),
+    UPITT_TRANSCRIPT_MENU_VIEW => array(
+      'title' => t('Show/hide transcript menus on Islandora Object pages'),
+      'description' => t('Whether a user should have transcript tabs visible on islandora content pages.'),
     ),
   );
 }
