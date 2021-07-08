@@ -494,8 +494,13 @@ function islandora_upitt_preprocess_page(&$variables) {
     $islandora_object = menu_get_object('islandora_object', 2);
     if (is_object($islandora_object) && (isset($islandora_object['TRANSCRIPT']) && ($item['path'] == 'islandora/object/%/from_search/%' ||
       $item['path'] == 'islandora/object/%' || $item['path'] == 'islandora/object/%/viewer')))   {
-      $variables['tabs'] = islandora_upitt_add_transcript_tab($variables['tabs'], $islandora_object);
-    }
+      	if (!user_is_logged_in()){
+          islandora_upitt_removetabs('Metadata', $variables);
+          islandora_upitt_removetabs('Pages', $variables);
+          islandora_upitt_removetabs('Transcript', $variables);
+        }
+$variables['tabs'] = islandora_upitt_add_transcript_tab($variables['tabs'], $islandora_object);
+    	}
     $path = drupal_get_path('module', 'islandora_upitt');
     drupal_add_css($path . '/css/islandora_pitt.css');
 
@@ -510,6 +515,16 @@ function islandora_upitt_preprocess_page(&$variables) {
     // Hide the sidebar on these pages:
     if (strstr($item['path'], 'islandora/datastreams_io')) {
       $variables['page']['sidebar'] = array();
+    }
+  }
+}
+
+function islandora_upitt_removetabs($label, &$vars){
+if (is_array($vars['tabs']['#primary'])){
+  foreach ($vars['tabs']['#primary'] as $key => $primary_tab){
+    if ($primary_tab['#link']['title'] == $label) {
+      unset($vars['tabs']['#primary'][$key]);
+      }
     }
   }
 }
@@ -620,7 +635,7 @@ function islandora_upitt_add_transcript_tab($tabs, $islandora_object) {
   if (array_key_exists('#primary', $tabs) && is_array($tabs['#primary'])) {
     foreach ($tabs['#primary'] as $tab) {
       if (array_key_exists('#link', $tab)) {
-        $transcript_tab_exists |= ($tab['#link']['title'] == 'Manage');
+        $transcript_tab_exists |= ($tab['#link']['title'] == 'Transcript');
       }
     }
   }
