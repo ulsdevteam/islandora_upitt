@@ -493,7 +493,7 @@ function islandora_upitt_preprocess_page(&$variables) {
   if (is_array($item)) {
     $islandora_object = menu_get_object('islandora_object', 2);
     if (is_object($islandora_object) && (isset($islandora_object['TRANSCRIPT']) && ($item['path'] == 'islandora/object/%/from_search/%' ||
-      $item['path'] == 'islandora/object/%' || $item['path'] == 'islandora/object/%/viewer')))   {
+      $item['path'] == 'islandora/object/%' || $item['path'] == 'islandora/object/%/viewer' || $item['path'] == 'islandora/object/%/transcript')))   {
       	if (!user_is_logged_in()){
           islandora_upitt_removetabs('Metadata', $variables);
           islandora_upitt_removetabs('Pages', $variables);
