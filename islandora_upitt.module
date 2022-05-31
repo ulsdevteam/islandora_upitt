@@ -90,7 +90,12 @@ function islandora_upitt_menu_alter(&$items) {
 
 
 function islanora_upitt_view($islandora_object) {
-  if (in_array('islandora:collectionCModel', $islandora_object->models) === FALSE) {
+  if (in_array('islandora:findingAidCModel', $islandora_object->models) !== FALSE) {
+    // Object is a finding aid
+    $menu_item = menu_get_item();
+    header('Location: '.url(implode('/', array_slice($menu_item['original_map'], 0, 3)).'/viewer'));
+    exit;
+  } else if (in_array('islandora:collectionCModel', $islandora_object->models) === FALSE) {
     islandora_upitt_insert_canonical_object_link($islandora_object);
     return theme('islandora_upitt_view', array('islandora_object' => $islandora_object));
   }
@@ -742,6 +747,9 @@ function islandora_upitt_form_alter( &$form, &$form_state, $form_id ) {
         if (is_array($form['terms'][$k]) && array_key_exists('search', $form['terms'][$k])) {
           $form['terms'][$k]['search']['#attributes']['placeholder'][] = t( 'Refine this search...' );
         }
+      } 
+      if (isset($form['controls']['islandora_solr_allow_preserve_filters'])) {
+        $form['controls']['islandora_solr_allow_preserve_filters']['#default_value'] = TRUE;
       }
       break;
     case 'islandora_solr_simple_search_form':
