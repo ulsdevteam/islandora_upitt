@@ -69,7 +69,8 @@ function islandora_upitt_preprocess_islandora_upitt_view(&$variables) {
 
     if (isset($islandora_object['MODS'])) {
       $block = module_invoke('upitt_discovery_system_links_block', 'block_view', 'discovery_system_links_block');
-      $variables['discovery_links_block'] = render($block['content']);
+      $block_content = (is_array($block) && isset($block['content'])) ? $block['content'] : '';
+      $variables['discovery_links_block'] = render($block_content);
 
       module_load_include('module', 'upitt_islandora_solr_search_extras');
       $variables['upitt_date'] = upitt_islandora_solr_search_extras_get_best_date($islandora_object);
